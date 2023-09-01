@@ -92,6 +92,7 @@ templateTable.innerHTML = `
     @media (prefers-color-scheme: dark) {
         .grid-item {
             border: 1px solid rgb(52, 52, 56);
+            color: white;
         }
     }
 </style>
@@ -131,32 +132,25 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     }
 
     connectedCallback() {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            JSON.parse(this.getAttribute('configuration'))
-        )
+        const encodedTableJSON = this.getAttribute('configuration');
+        const decodedTableJSON = encodedTableJSON
+            ?.replace(/&quot;/g, '"')
+            ?.replace(/&#39;/g, "'");
+        const configuration = JSON.parse(decodedTableJSON);
+
+        if (configuration) {
+            this.config = new OuterbasePluginConfig_$PLUGIN_ID(
+                configuration
+            )
+        }
 
         // Set the items property to the value of the `tableValue` attribute.
         if (this.getAttribute('tableValue')) {
             const encodedTableJSON = this.getAttribute('tableValue');
             const decodedTableJSON = encodedTableJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
+                ?.replace(/&quot;/g, '"')
+                ?.replace(/&#39;/g, "'");
             this.items = JSON.parse(decodedTableJSON);
-            console.log('Table Items: ', this.items)
-
-            const encodedTableSchemaJSON = this.getAttribute('tableSchemaValue');
-            const decodedTableSchemaJSON = encodedTableSchemaJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
-            const tableSchema = JSON.parse(decodedTableSchemaJSON);
-            console.log('Table Schema: ', tableSchema)
-
-            const encodedDatabaseSchemaJSON = this.getAttribute('tableSchemaValue');
-            const decodedDatabaseSchemaJSON = encodedDatabaseSchemaJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
-            const databaseSchema = JSON.parse(decodedDatabaseSchemaJSON);
-            console.log('Database Schema: ', databaseSchema)
         }
 
         // Manually render dynamic content
@@ -179,42 +173,6 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
             `).join("")}
         </div>
         `
-
-        // TODO: Remove this.
-        // This is only to be used as a testing example of what changing a cells value could
-        // look like. Need to test handling table plugins that have the ability to propagate
-        // changes back to the table & server.
-        // var cards = this.shadow.querySelectorAll(".grid-item")
-        //     cards.forEach((card) => {
-        //         card.addEventListener("click", () => {
-        //             console.log('Detected click on grid item: ', card)
-        //             this.setAttribute('onupdaterow', JSON.stringify({
-        //                 "change": {
-        //                     "year": "2004"
-        //                 },
-        //                 "row_data": {
-        //                     "id": 240,
-        //                     "make_id": "Buick",
-        //                     "model": "Century",
-        //                     "year": "2004",
-        //                     "vin": "KL4CJDSB3EB020409",
-        //                     "color": "Purple",
-        //                     "price": 99943,
-        //                     "city": "Des Moines",
-        //                     "state": "Iowa",
-        //                     "postal": 50330,
-        //                     "longitude": 58.4767,
-        //                     "latitude": -16.1003,
-        //                     "description": "Cras mi pede\\, malesuada in\\, imperdiet et\\, commodo vulputate\\, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet\\, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu\\, adipiscing molestie\\, hendrerit at\\, vulputate vitae\\, nisl. Aenean lectus. Pellentesque eget nunc. Donec quis orci eget orci vehicula condimentum.",
-        //                     "seller": "Lorena97",
-        //                     "seller_name": "Kay Trent",
-        //                     "image": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0",
-        //                     "image_thumb": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0"
-        //                 }
-        //             }))
-        //         }
-        //     )
-        // })
     }
 }
 
@@ -325,13 +283,23 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         // Parse the configuration object from the `configuration` attribute
         // and store it in the `config` property.
+        const encodedTableJSON = this.getAttribute('configuration');
+        const decodedTableJSON = encodedTableJSON
+            ?.replace(/&quot;/g, '"')
+            ?.replace(/&#39;/g, "'");
+        const configuration = JSON.parse(decodedTableJSON);
+
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            JSON.parse(this.getAttribute('configuration'))
+            configuration
         )
 
         // Set the items property to the value of the `tableValue` attribute.
         if (this.getAttribute('tableValue')) {
-            this.items = decodeURI(JSON.parse(this.getAttribute('tableValue')))
+            const encodedTableJSON = this.getAttribute('tableValue');
+            const decodedTableJSON = encodedTableJSON
+                ?.replace(/&quot;/g, '"')
+                ?.replace(/&#39;/g, "'");
+            this.items = JSON.parse(decodedTableJSON);
         }
 
         // Manually render dynamic content
