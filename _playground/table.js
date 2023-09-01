@@ -1,3 +1,24 @@
+// ----------------------
+// IMPORTANT PLEASE READ:
+// ----------------------
+// A list of all of the attributes that Outerbase can optionally pass to this element.
+// It is **IMPORTANT** to note that you should _REMOVE ALL_ attributes that you do not use.
+// Outerbase will pass in all of the attributes that you specify here, which could cause
+// undesired performance issues if you are not using them.
+//
+// When you submit your plugin to our marketplace, the attributes you list here will also
+// be displayed to users installing your plugin, so it is important to only list the ones
+// that you are using. Asking for more data than you need will likely cause users to not
+// install your plugin.
+//
+// Supported values:
+// - cellValue: The value of the cell that the plugin is being rendered in.
+// - rowValue: The value of the row that the plugin is being rendered in.
+// - tableValue: The value of the table that the plugin is being rendered in.
+// - tableSchemaValue: The schema of the table that the plugin is being rendered in.
+// - databaseSchemaValue: The schema of the database that the plugin is being rendered in.
+// - configuration: The configuration object that the user specified when installing the plugin.
+//
 var privileges = [
     'tableValue',
     'configuration',
@@ -101,6 +122,8 @@ templateTable.innerHTML = `
 </div>
 `
 
+// This is the configuration object that Outerbase passes to your plugin.
+// Define all of the configuration options that your plugin requires here.
 class OuterbasePluginConfig_$PLUGIN_ID {
     imageKey = undefined
     titleKey = undefined
@@ -126,37 +149,26 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     constructor() {
         super()
 
+        // The shadow DOM is a separate DOM tree that is attached to the element.
+        // This allows us to encapsulate our styles and markup. It also prevents
+        // styles from the parent page from leaking into our plugin.
         this.shadow = this.attachShadow({ mode: 'open' })
         this.shadow.appendChild(templateTable.content.cloneNode(true))
     }
 
+    // This function is called when the UI is made available into the DOM. Put any
+    // logic that you want to run when the element is first stood up here, such as
+    // event listeners, default values to display, etc.
     connectedCallback() {
+        // Parse the configuration object from the `configuration` attribute
+        // and store it in the `config` property.
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(
             JSON.parse(this.getAttribute('configuration'))
         )
 
         // Set the items property to the value of the `tableValue` attribute.
         if (this.getAttribute('tableValue')) {
-            const encodedTableJSON = this.getAttribute('tableValue');
-            const decodedTableJSON = encodedTableJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
-            this.items = JSON.parse(decodedTableJSON);
-            console.log('Table Items: ', this.items)
-
-            const encodedTableSchemaJSON = this.getAttribute('tableSchemaValue');
-            const decodedTableSchemaJSON = encodedTableSchemaJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
-            const tableSchema = JSON.parse(decodedTableSchemaJSON);
-            console.log('Table Schema: ', tableSchema)
-
-            const encodedDatabaseSchemaJSON = this.getAttribute('tableSchemaValue');
-            const decodedDatabaseSchemaJSON = encodedDatabaseSchemaJSON
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'");
-            const databaseSchema = JSON.parse(decodedDatabaseSchemaJSON);
-            console.log('Database Schema: ', databaseSchema)
+            this.items = JSON.parse(this.getAttribute('tableValue'))
         }
 
         // Manually render dynamic content
@@ -179,42 +191,6 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
             `).join("")}
         </div>
         `
-
-        // TODO: Remove this.
-        // This is only to be used as a testing example of what changing a cells value could
-        // look like. Need to test handling table plugins that have the ability to propagate
-        // changes back to the table & server.
-        // var cards = this.shadow.querySelectorAll(".grid-item")
-        //     cards.forEach((card) => {
-        //         card.addEventListener("click", () => {
-        //             console.log('Detected click on grid item: ', card)
-        //             this.setAttribute('onupdaterow', JSON.stringify({
-        //                 "change": {
-        //                     "year": "2004"
-        //                 },
-        //                 "row_data": {
-        //                     "id": 240,
-        //                     "make_id": "Buick",
-        //                     "model": "Century",
-        //                     "year": "2004",
-        //                     "vin": "KL4CJDSB3EB020409",
-        //                     "color": "Purple",
-        //                     "price": 99943,
-        //                     "city": "Des Moines",
-        //                     "state": "Iowa",
-        //                     "postal": 50330,
-        //                     "longitude": 58.4767,
-        //                     "latitude": -16.1003,
-        //                     "description": "Cras mi pede\\, malesuada in\\, imperdiet et\\, commodo vulputate\\, justo. In blandit ultrices enim. Lorem ipsum dolor sit amet\\, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices. Phasellus id sapien in sapien iaculis congue. Vivamus metus arcu\\, adipiscing molestie\\, hendrerit at\\, vulputate vitae\\, nisl. Aenean lectus. Pellentesque eget nunc. Donec quis orci eget orci vehicula condimentum.",
-        //                     "seller": "Lorena97",
-        //                     "seller_name": "Kay Trent",
-        //                     "image": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0",
-        //                     "image_thumb": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0"
-        //                 }
-        //             }))
-        //         }
-        //     )
-        // })
     }
 }
 
@@ -225,77 +201,6 @@ templateConfiguration.innerHTML = `
         display: flex;
         height: 100%;
         overflow-y: scroll;
-        padding: 40px 50px 65px 40px;
-    }
-
-    .field-title {
-        font: "Inter", sans-serif;
-        font-size: 12px;
-        line-height: 18px;
-        font-weight: 500;
-        margin: 0 0 8px 0;
-    }
-
-    select {
-        width: 320px;
-        height: 40px;
-        margin-bottom: 16px;
-        background: transparent;
-        border: 1px solid #343438;
-        border-radius: 8px;
-        color: black;
-        font-size: 14px;
-        padding: 0 8px;
-        cursor: pointer;
-        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="32"><path fill="black" d="M480-380 276-584l16-16 188 188 188-188 16 16-204 204Z"/></svg>');
-        background-position: 100%;
-        background-repeat: no-repeat;
-        appearance: none;
-        -webkit-appearance: none !important;
-        -moz-appearance: none !important;
-    }
-
-    button {
-        border: none;
-        background-color: #834FF8;
-        color: white;
-        padding: 6px 18px;
-        font: "Inter", sans-serif;
-        font-size: 14px;
-        line-height: 18px;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-
-    .preview-card {
-        margin-left: 80px;
-        width: 240px;
-        background-color: white;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .preview-card > img {
-        width: 100%;
-        height: 165px;
-    }
-
-    .preview-card > div {
-        padding: 16px;
-        display: flex; 
-        flex-direction: column;
-        color: black;
-    }
-
-    .preview-card > div > p {
-        margin: 0;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        select {
-            color: white;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="32"><path fill="white" d="M480-380 276-584l16-16 188 188 188-188 16 16-204 204Z"/></svg>');
-        }
     }
 </style>
 
@@ -311,6 +216,12 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
     items = []
+    // selectedFields = {
+    //     imageKey: undefined,
+    //     titleKey: undefined,
+    //     descriptionKey: undefined,
+    //     subtitleKey: undefined,
+    // }
 
     constructor() {
         super()
@@ -322,6 +233,9 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
         this.shadow.appendChild(templateConfiguration.content.cloneNode(true))
     }
 
+    // This function is called when the UI is made available into the DOM. Put any
+    // logic that you want to run when the element is first stood up here, such as
+    // event listeners, default values to display, etc.
     connectedCallback() {
         // Parse the configuration object from the `configuration` attribute
         // and store it in the `config` property.
@@ -331,7 +245,7 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         // Set the items property to the value of the `tableValue` attribute.
         if (this.getAttribute('tableValue')) {
-            this.items = decodeURI(JSON.parse(this.getAttribute('tableValue')))
+            this.items = JSON.parse(this.getAttribute('tableValue'))
         }
 
         // Manually render dynamic content
@@ -339,44 +253,43 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 
     render() {
-        let sample = this.items.length ? this.items[0] : {}
+        let sample = this.items[0]
         let keys = Object.keys(sample)
 
         this.shadow.querySelector('#container').innerHTML = `
         <div style="flex: 1;">
-            <p class="field-title">Image Key</p>
-            <select id="imageKeySelect">
+            <p>Image Key</p>
+            <select id="imageKeySelect" style="margin-bottom: 8px;">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.imageKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
-            <p class="field-title">Title Key</p>
-            <select id="titleKeySelect">
+            <p>Title Key</p>
+            <select id="titleKeySelect" style="margin-bottom: 8px;">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.titleKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
-            <p class="field-title">Description Key</p>
-            <select id="descriptionKeySelect">
+            <p>Description Key</p>
+            <select id="descriptionKeySelect" style="margin-bottom: 8px;">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.descriptionKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
-            <p class="field-title">Subtitle Key</p>
-            <select id="subtitleKeySelect">
+            <p>Subtitle Key</p>
+            <select id="subtitleKeySelect" style="margin-bottom: 8px;">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.subtitleKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
-            <div style="margin-top: 8px;">
-                <button id="saveButton">Save View</button>
-            </div>
+            <button id="saveButton">Save</button>
         </div>
 
         <div>
-            <div class="preview-card">
-                <img src="${sample[this.config.imageKey]}" width="100" height="100">
+            <div>
+                Preview Area
 
-                <div>
-                    <p style="margin-bottom: 8px; font-weight: bold; font-size: 16px; line-height: 24px; font-family: 'Inter', sans-serif;">${sample[this.config.titleKey]}</p>
-                    <p style="margin-bottom: 8px; font-size: 14px; line-height: 21px; font-weight: 400; font-family: 'Inter', sans-serif;">${sample[this.config.descriptionKey]}</p>
-                    <p style="margin-top: 12px; font-size: 12px; line-height: 16px; font-family: 'Inter', sans-serif; color: gray; font-weight: 300;">${sample[this.config.subtitleKey]}</p>
+                <div style="display: flex; flex-direction: column; margin-top: 8px;">
+                    <img src="${sample[this.config.imageKey]}" width="100" height="100">
+                    <p style="margin-top: 8px; font-weight: bold; font-size: 16px; line-height: 24px; font-family: 'Inter', sans-serif;">${sample[this.config.titleKey]}</p>
+                    <p style="margin-top: 8px; font-size: 14px; line-height: 20px; font-family: 'Inter', sans-serif;">${sample[this.config.descriptionKey]}</p>
+                    <p style="margin-top: 8px; font-size: 12px; line-height: 16px; font-family: 'Inter', sans-serif; color: gray; font-weight: 300;">${sample[this.config.subtitleKey]}</p>
                 </div>
             </div>
         </div>
@@ -384,7 +297,7 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            this.setAttribute('onsave', true)
+            this.setAttribute('onSave', Math.floor(Math.random() * 100))
         });
 
         var imageKeySelect = this.shadow.getElementById("imageKeySelect");
@@ -413,5 +326,9 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 }
 
-window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-table-configuration-$PLUGIN_ID', OuterbasePluginTableConfiguration_$PLUGIN_ID)
+
+// DO NOT change the name of this variable or the classes defined in this file.
+// Changing the name of this variable will cause your plugin to not work properly
+// when installed in Outerbase.
+window.customElements.define('outerbase-plugin-table', OuterbasePluginTable_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table-configuration', OuterbasePluginTableConfiguration_$PLUGIN_ID)

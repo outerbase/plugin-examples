@@ -2,15 +2,74 @@
 <head>
     <title>Web Component Previewer</title>
 
-    <script src="./columns/enum-pill.js"></script>
-    <script src="./tables/image-grid.js"></script>
+    <!-- <script src="./_playground/cell-renderer.js"></script>
+    <script src="./_playground/cell-editor.js"></script> -->
+    <script src="./_playground/table.js"></script>
+
+    <script>
+        var sampleTable = [{
+            "id": "123456",
+            "first_name": "John",
+            "last_name": "Doe"
+        }, {
+            "id": "123457",
+            "first_name": "Jane",
+            "last_name": "Doe"
+        }, {
+            "id": "123458",
+            "first_name": "John",
+            "last_name": "Smith"
+        }, {
+            "id": "123459",
+            "first_name": "Jane",
+            "last_name": "Smith"
+        }
+        ];
+
+        var sampleRow = {
+            "id": "123456",
+            "first_name": "John",
+            "last_name": "Doe"
+        }
+
+        var sampleCell = "https://ix-www.imgix.net/homepage_hero-image@2x.png?ixlib=js-3.8.0&q=70&w=1800&auto=compress%2Cenhance%2Cformat&dpr=2"
+    </script>
 </head>
 
 <body>
-    <!-- Inject the web component here to preview. -->
-    <div style="width: 100%; height: 40px;">
-        <outerbase-plugin-cell></outerbase-plugin-cell>
+    <div>
+        <button>Cell</button>
+        <button>Table</button>
+        <button>Configuration</button>
     </div>
+
+    <!-- <div style="width: 100%; height: 40px;">
+        <outerbase-plugin-cell
+            cellValue="password"
+        ></outerbase-plugin-cell>
+
+        <outerbase-plugin-editor
+            cellValue="password"
+        ></outerbase-plugin-editor>
+    </div> -->
+
+    <div style="display: flex; align-items: center; margin-top: 18px;">
+        <div style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: green;"></div>
+        <p style="margin: 0;">Received `onSave` message</p>
+    </div>
+
+    <div style="display: flex; align-items: center;">
+        <div style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+        <p style="margin: 0;">Received `onCancel` message</p>
+    </div>
+
+    <!-- <outerbase-plugin-table-b57ff889568c43839c9c94a2c81b3a25></outerbase-plugin-table-b57ff889568c43839c9c94a2c81b3a25> -->
+    <outerbase-plugin-table-configuration tableValue='[{"id": 240, "make_id": "Buick", "model": "Century", "year": 2023, "image": "https://images.unsplash.com/photo-1491573510686-b800ae4d955e?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0" }]'></outerbase-plugin-table-configuration>
+
+    <!-- Inject the web component here to preview. -->
+    <!-- <div style="width: 100%; height: 40px;">
+        <outerbase-plugin-cell></outerbase-plugin-cell>
+    </div> -->
 
     <!-- <outerbase-plugin-table
         configuration='{
