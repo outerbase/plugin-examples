@@ -294,8 +294,22 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            this.setAttribute('onsave', true)
+            // this.setAttribute('onsave', true)
+            this.callCustomEvent({
+                action: 'onsave',
+                value: true
+            })
         });
+    }
+
+    callCustomEvent(data) {
+        const event = new CustomEvent('custom-change', {
+            detail: data,
+            bubbles: true,  // If you want the event to bubble up through the DOM
+            composed: true  // Allows the event to pass through shadow DOM boundaries
+        });
+
+        this.dispatchEvent(event);
     }
 }
 

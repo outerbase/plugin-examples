@@ -114,6 +114,15 @@ class OuterbasePluginConfig_$PLUGIN_ID {
         this.descriptionKey = object?.descriptionKey
         this.subtitleKey = object?.subtitleKey
     }
+
+    toJSON() {
+        return {
+            "imageKey": this.imageKey,
+            "titleKey": this.titleKey,
+            "descriptionKey": this.descriptionKey,
+            "subtitleKey": this.subtitleKey
+        }
+    }
 }
 
 class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
@@ -352,7 +361,10 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            this.setAttribute('onsave', true)
+            this.callCustomEvent({
+                action: 'onsave',
+                value: this.config.toJSON()
+            })
         });
 
         var imageKeySelect = this.shadow.getElementById("imageKeySelect");
@@ -378,6 +390,16 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
             this.config.subtitleKey = subtitleKeySelect.value
             this.render()
         });
+    }
+
+    callCustomEvent(data) {
+        const event = new CustomEvent('custom-change', {
+            detail: data,
+            bubbles: true,  // If you want the event to bubble up through the DOM
+            composed: true  // Allows the event to pass through shadow DOM boundaries
+        });
+
+        this.dispatchEvent(event);
     }
 }
 
