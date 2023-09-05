@@ -24,13 +24,97 @@ templateTable.innerHTML = `
 <style>
     #container {
         display: flex;
+        flex-direction: column;
         height: 100%;
         overflow-y: scroll;
+        padding: 24px;
+    }
+
+    #flag-list {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .list-item {
+        width: 300px;
+        height: 300px;
+        border: 1px solid white;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .value-input {
+        width: calc(100% - 16px);
+        background: transparent;
+        border: 1px solid white;
+        color: white;
+        padding: 4px 8px;
+        flex: 1;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+      
+
+    @media (prefers-color-scheme: dark) {
+        #container {
+            color: white;
+        }
     }
 </style>
 
 <div id="container">
-    
+    <h1>My Feature Flags</h1>
+
+    <div id="flag-list">
+
+    </div>
 </div>
 `
 
@@ -82,21 +166,65 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     }
 
     render() {
-        this.shadow.querySelector('#container').innerHTML = `
-        <div class="grid-container">
-            <h1>Hello, Table World!</h1>
-        </div>
-        `
-    }
+        this.shadow.querySelector('#flag-list').innerHTML = `
+            ${this.items.map((item, index) => `
+                <div class="list-item">
+                    <h4 style="margin: 0;" class="text-3xl font-bold underline">${item.name}</h4>
+                    <p style="margin: 0;">Flag Value:</p>
+                    <textarea class="value-input" data-index="${index}" placeholder="Enter value">${item.value}</textarea>
 
-    callCustomEvent(data) {
-        const event = new CustomEvent('custom-change', {
-            detail: data,
-            bubbles: true,  // If you want the event to bubble up through the DOM
-            composed: true  // Allows the event to pass through shadow DOM boundaries
+                    <div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleSwitch" data-index="${index}" checked="${item.status === 'on'}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            `).join("")}
+        `
+
+        const textareas = this.shadowRoot.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('blur', (event) => {
+                const index = event.target.getAttribute('data-index');
+                const value = event.target.value; 
+
+                this.items[index].value = event.target.value;
+
+                const data = {
+                    action: 'onUpdateRow',
+                    value: {...this.items[index]}
+                };
+
+                const customEvent = new CustomEvent('custom-change', {
+                    detail: data,
+                    bubbles: true,  // If you want the event to bubble up through the DOM
+                    composed: true  // Allows the event to pass through shadow DOM boundaries
+                });
+
+                this.dispatchEvent(customEvent)
+            });
         });
 
-        this.dispatchEvent(event);
+        this.shadow.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="checkbox"]')) {
+                const index = Number(e.target.getAttribute('data-index'));
+                this.items[index].status = e.target.checked;
+
+                const data = {
+                    action: 'onUpdateRow',
+                    value: {...this.items[index]}
+                };
+
+                const event = new CustomEvent('custom-change', {
+                    detail: data,
+                    bubbles: true,  // If you want the event to bubble up through the DOM
+                    composed: true  // Allows the event to pass through shadow DOM boundaries
+                });
+
+                this.dispatchEvent(event);
+            }
+        });
     }
 }
 
@@ -166,21 +294,8 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            this.callCustomEvent({
-                action: 'onsave',
-                value: true
-            })
+            this.setAttribute('onsave', true)
         });
-    }
-
-    callCustomEvent(data) {
-        const event = new CustomEvent('custom-change', {
-            detail: data,
-            bubbles: true,  // If you want the event to bubble up through the DOM
-            composed: true  // Allows the event to pass through shadow DOM boundaries
-        });
-
-        this.dispatchEvent(event);
     }
 }
 

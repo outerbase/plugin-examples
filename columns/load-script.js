@@ -1,24 +1,3 @@
-// ----------------------
-// IMPORTANT PLEASE READ:
-// ----------------------
-// A list of all of the attributes that Outerbase can optionally pass to this element.
-// It is **IMPORTANT** to note that you should _REMOVE ALL_ attributes that you do not use.
-// Outerbase will pass in all of the attributes that you specify here, which could cause
-// undesired performance issues if you are not using them.
-//
-// When you submit your plugin to our marketplace, the attributes you list here will also
-// be displayed to users installing your plugin, so it is important to only list the ones
-// that you are using. Asking for more data than you need will likely cause users to not
-// install your plugin.
-//
-// Supported values:
-// - cellValue: The value of the cell that the plugin is being rendered in.
-// - rowValue: The value of the row that the plugin is being rendered in.
-// - tableValue: The value of the table that the plugin is being rendered in.
-// - tableSchemaValue: The schema of the table that the plugin is being rendered in.
-// - databaseSchemaValue: The schema of the database that the plugin is being rendered in.
-// - configuration: The configuration object that the user specified when installing the plugin.
-//
 var privileges = [
     'cellValue',
     'configuration'
@@ -133,7 +112,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
     connectedCallback() {
         this.loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.2.0/bcrypt.min.js')
-        // this.loadExternalScript('https://raw.githubusercontent.com/nevins-b/javascript-bcrypt/master/bCrypt.js')
         .then(() => {
             // The external script has been loaded successfully
             // You can now use its functionality

@@ -1,14 +1,6 @@
 // ----------------------
 // IMPORTANT PLEASE READ:
 // ----------------------
-// A list of all of the attributes that Outerbase can optionally pass to this element.
-// If an attribute is listed here it does **NOT** mean that it will receive this data.
-// When you submit your plugin to our marketplace, you will be asked again to accurately
-// select which attributes your plugin requires to operate successfully. When those selections
-// are made, Outerbase will only pass the attributes that you have selected, not the ones
-// specified here. Outerbase will pass in all of the attributes that you specify here, which 
-// could cause undesired performance issues if you are not using them.
-//
 // When you submit your plugin to our marketplace, the attributes you select when uploading will
 // be displayed to users installing your plugin, so it is important to only select the ones
 // that you are using. Asking for more data than you need will likely cause users to not

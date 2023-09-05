@@ -1,27 +1,3 @@
-// ----------------------
-// IMPORTANT PLEASE READ:
-// ----------------------
-// A list of all of the attributes that Outerbase can optionally pass to this element.
-// If an attribute is listed here it does **NOT** mean that it will receive this data.
-// When you submit your plugin to our marketplace, you will be asked again to accurately
-// select which attributes your plugin requires to operate successfully. When those selections
-// are made, Outerbase will only pass the attributes that you have selected, not the ones
-// specified here. Outerbase will pass in all of the attributes that you specify here, which 
-// could cause undesired performance issues if you are not using them.
-//
-// When you submit your plugin to our marketplace, the attributes you select when uploading will
-// be displayed to users installing your plugin, so it is important to only select the ones
-// that you are using. Asking for more data than you need will likely cause users to not
-// install your plugin.
-//
-// Supported values:
-// - cellValue: The value of the cell that the plugin is being rendered in.
-// - rowValue: The value of the row that the plugin is being rendered in.
-// - tableValue: The value of the table that the plugin is being rendered in.
-// - tableSchemaValue: The schema of the table that the plugin is being rendered in.
-// - databaseSchemaValue: The schema of the database that the plugin is being rendered in.
-// - configuration: The configuration object that the user specified when installing the plugin.
-//
 var privileges = [
     'cellValue',
     'configuration',
@@ -137,21 +113,50 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         if (imageInput && viewImageButton) {
             imageInput.addEventListener("focus", () => {
                 // Tell Outerbase to start editing the cell
-                this.setAttribute('onstopedit', true)
+                console.log('onstopedit 1')
+                // this.setAttribute('onstopedit', true)
+                this.callCustomEvent({
+                    action: 'onstopedit',
+                    value: true
+                })
             });
 
             imageInput.addEventListener("blur", () => {
                 // Tell Outerbase to update the cells raw value
-                this.setAttribute('cellvalue', imageInput.value)
+                // this.setAttribute('cellvalue', imageInput.value)
+                this.callCustomEvent({
+                    action: 'cellvalue',
+                    value: imageInput.value
+                })
 
                 // Then stop editing the cell and close the editor view
-                this.setAttribute('onstopedit', true)
+                // console.log('onstopedit 2')
+                // this.setAttribute('onstopedit', true)
+                this.callCustomEvent({
+                    action: 'onstopedit',
+                    value: true
+                })
             });
 
             viewImageButton.addEventListener("click", () => {
-                this.setAttribute('onedit', true)
+                // console.log('onedit')
+                // this.setAttribute('onedit', true)
+                this.callCustomEvent({
+                    action: 'onedit',
+                    value: true
+                })
             });
         }
+    }
+
+    callCustomEvent(data) {
+        const event = new CustomEvent('custom-change', {
+            detail: data,
+            bubbles: true,  // If you want the event to bubble up through the DOM
+            composed: true  // Allows the event to pass through shadow DOM boundaries
+        });
+
+        this.dispatchEvent(event);
     }
 }
 
