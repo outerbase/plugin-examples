@@ -1,0 +1,33 @@
+body {
+    background-color: #FAFAFA;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 24px);
+    gap: 16px;
+    margin: 12px;
+}
+
+.top-container {
+    background-color: lightblue;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid var(--neutral-200, #E5E5E5);
+    background: linear-gradient(90deg, #F5F5F5 0%, #FAFAFA 100%, #FAFAFA 100%);
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.05);
+}
+
+.content-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+}
+
+.table_container {
+    border: 2px solid #E5E5E5;
+    border-radius: 8px;
+    flex: 1;
+}
