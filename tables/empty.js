@@ -34,6 +34,10 @@ const OuterbaseColumnEvent = {
 const OuterbaseTableEvent = {
     // Updates the value of a row with the provided JSON value
     updateRow: "updateRow",
+    // Deletes an entire row with the provided JSON value
+    deleteRow: "deleteRow",
+    // Creates a new row with the provided JSON value
+    createRow: "createRow",
     // Performs an action to get the next page of results, if they exist
     getNextPage: "getNextPage",
     // Performs an action to get the previous page of results, if they exist
@@ -84,7 +88,7 @@ const decodeAttributeByName = (fromClass, name) => {
     const decodedJSON = encodedJSON
         ?.replace(/&quot;/g, '"')
         ?.replace(/&#39;/g, "'");
-    return JSON.parse(decodedJSON);
+    return decodedJSON ? JSON.parse(decodedJSON) : {};
 }
 
 
