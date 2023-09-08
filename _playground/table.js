@@ -68,6 +68,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     count = 0
     page = 1
     offset = 50
+    theme = "light"
 
     // Inputs from the configuration screen
     imageKey = undefined
@@ -205,6 +206,13 @@ templateTable.innerHTML = `
         margin: 0;
     }
 
+    .dark {
+        #container {
+            background-color: black;
+            color: white;
+        }
+    }
+
     @media only screen and (min-width: 768px) {
         .grid-container {
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -226,8 +234,10 @@ templateTable.innerHTML = `
     }
 </style>
 
-<div id="container">
-    
+<div id="theme-container">
+    <div id="container">
+        
+    </div>
 </div>
 `
 // Can the above div just be a self closing container: <div />
@@ -251,9 +261,15 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        console.log('Changed Name: ', name)
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
         this.config.tableValue = decodeAttributeByName(this, "tableValue")
+        this.config.theme = decodeAttributeByName(this, "metadata").theme
+
+        var element = this.shadow.getElementById("theme-container");
+        element.classList.remove("dark")
+        element.classList.add(this.config.theme);
+
+        console.log('Theme: ', this.config.theme)
 
         this.render()
     }

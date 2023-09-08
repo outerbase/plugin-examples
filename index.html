@@ -67,8 +67,8 @@
             </div>
 
             <div>
-                <button>Light Mode</button>
-                <button>Dark Mode</button>
+                <button id="lightThemeButton">Light Mode</button>
+                <button id="darkThemeButton">Dark Mode</button>
             </div>
     
             <div style="align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
@@ -104,6 +104,7 @@
                 <outerbase-plugin-table
                     configuration=""
                     tableValue=""
+                    metadata=""
                 />
             </div>
         </div>
@@ -124,6 +125,18 @@
             }
         }
 
+        function toggleTheme(theme) {
+            var tableElement = document.querySelector("outerbase-plugin-table");
+
+            if (tableElement) {
+                let options = {
+                    theme: theme
+                }
+                let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+                tableElement.setAttribute("metadata", metadata);
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             var tableElement = document.querySelector("outerbase-plugin-table");
 
@@ -133,6 +146,14 @@
                 updateRows()
             }
         });
+
+        document.getElementById("lightThemeButton").addEventListener("click", function() {
+            toggleTheme("light")
+        })
+
+        document.getElementById("darkThemeButton").addEventListener("click", function() {
+            toggleTheme("dark")
+        })
     </script>
 
 
