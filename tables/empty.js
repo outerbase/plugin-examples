@@ -168,7 +168,7 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
         saveButton.addEventListener("click", () => {
             this.callCustomEvent({
                 action: 'onsave',
-                value: true
+                value: this.config
             })
         });
     }
