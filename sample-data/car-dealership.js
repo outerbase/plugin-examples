@@ -1,11 +1,11 @@
-var sampleTableConfiguration = {
+var carDealershipConfiguration = {
     "imageKey": "image",
     "titleKey": "make_id",
     "subtitleKey": "model",
     "descriptionKey": "description"
 }
 
-var sampleTable = {
+var carDealership = {
     "success": true,
     "response": {
         "count": 240,

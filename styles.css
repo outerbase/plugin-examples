@@ -32,3 +32,12 @@ body {
     flex: 1;
     overflow: hidden;
 }
+
+.configuration_container {
+    border: 2px solid #E5E5E5;
+    border-radius: 8px;
+    flex: 1;
+    overflow: hidden;
+    justify-content: space-between;
+    max-width: 720px;
+}
