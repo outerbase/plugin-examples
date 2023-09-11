@@ -116,7 +116,7 @@ templateConfiguration.innerHTML = `
 </div>
 `
 
-class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
         return privileges
     }
@@ -168,7 +168,7 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
         saveButton.addEventListener("click", () => {
             this.callCustomEvent({
                 action: 'onsave',
-                value: true
+                value: {}
             })
         });
     }
@@ -185,4 +185,4 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 }
 
 window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-table-configuration-$PLUGIN_ID', OuterbasePluginTableConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)
