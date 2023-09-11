@@ -340,9 +340,31 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
 
         var createRowButton = this.shadow.getElementById("createRowButton");
         createRowButton.addEventListener("click", () => {
+            let row = {
+                "id": 0,
+                "make_id": "Outerbase",
+                "model": "Spacecar",
+                "year": 2047,
+                "vin": "SPCMN404NOREGRETS",
+                "color": "Purple",
+                "price": 42069000,
+                "city": "Pittsburgh",
+                "state": "Pennsylvania",
+                "postal": 15203,
+                "longitude": 58.4767,
+                "latitude": -16.1003,
+                "description": "The best space car money can buy.",
+                "seller": "mr_base",
+                "seller_name": "Outer Base",
+                "image": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0",
+                "image_thumb": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0"
+            }
+            this.config.tableValue.push(row)
+            this.render()
+            
             triggerEvent(this, {
                 action: OuterbaseTableEvent.createRow,
-                value: {}
+                value: row
             })
         });
 
