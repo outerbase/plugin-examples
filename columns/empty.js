@@ -140,4 +140,4 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 // Changing the name of this variable will cause your plugin to not work properly
 // when installed in Outerbase.
 window.customElements.define('outerbase-plugin-cell-$PLUGIN_ID', OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-editor-$PLUGIN_ID', OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-cell-editor-$PLUGIN_ID', OuterbasePluginEditor_$PLUGIN_ID)

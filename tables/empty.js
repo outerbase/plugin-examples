@@ -232,4 +232,4 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 }
 
 window.customElements.define("outerbase-plugin-table-$PLUGIN_ID", OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-table-configuration-$PLUGIN_ID", OuterbasePluginTableConfiguration_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-configuration-$PLUGIN_ID", OuterbasePluginTableConfiguration_$PLUGIN_ID)
