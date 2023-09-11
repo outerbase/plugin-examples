@@ -113,8 +113,6 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         if (imageInput && viewImageButton) {
             imageInput.addEventListener("focus", () => {
                 // Tell Outerbase to start editing the cell
-                console.log('onstopedit 1')
-                // this.setAttribute('onstopedit', true)
                 this.callCustomEvent({
                     action: 'onstopedit',
                     value: true
@@ -123,15 +121,12 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
 
             imageInput.addEventListener("blur", () => {
                 // Tell Outerbase to update the cells raw value
-                // this.setAttribute('cellvalue', imageInput.value)
                 this.callCustomEvent({
                     action: 'cellvalue',
                     value: imageInput.value
                 })
 
                 // Then stop editing the cell and close the editor view
-                // console.log('onstopedit 2')
-                // this.setAttribute('onstopedit', true)
                 this.callCustomEvent({
                     action: 'onstopedit',
                     value: true
@@ -139,8 +134,6 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
             });
 
             viewImageButton.addEventListener("click", () => {
-                // console.log('onedit')
-                // this.setAttribute('onedit', true)
                 this.callCustomEvent({
                     action: 'onedit',
                     value: true

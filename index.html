@@ -6,13 +6,32 @@
     <script src="./_playground/cell-editor.js"></script> -->
     <script src="./_playground/table.js"></script>
 
-    <script src="./sample-data/table.js"></script>
+    <script src="./sample-data/car-dealership.js"></script>
     <link rel="stylesheet" href="styles.css">
 
 
     <script>
         var page = 0;
         var size = 13;
+
+        function selectViewTabIndex(index) {
+            index = Number(index)
+            localStorage.setItem('selectedViewIndex', index);
+        
+            var cellSwitchboard = document.getElementsByClassName("cell-switchboard")[0];
+            var tableSwitchboard = document.getElementsByClassName("table-switchboard")[0];
+            var configurationSwitchboard = document.getElementsByClassName("configuration-switchboard")[0];
+
+            cellSwitchboard.style.display = index === 0 ? 'grid' : 'none' ;
+            tableSwitchboard.style.display = index === 1 ? 'grid' : 'none';
+            configurationSwitchboard.style.display = index === 2 ? 'grid' : 'none';
+
+            var tablePreview = document.getElementsByClassName("table_container")[0];
+            var configurationView = document.getElementsByClassName("configuration_container")[0];
+
+            tablePreview.style.display = index === 1 ? 'block' : 'none';
+            configurationView.style.display = index === 2 ? 'block' : 'none';
+        }
 
         function flashIndicatorColor(element) {
             element.style.backgroundColor = 'green';
@@ -23,7 +42,9 @@
         }
         
         document.addEventListener('custom-change', function(event) {
-            if (event.detail.action === "getPreviousPage") {
+            let action = event.detail.action.toLowerCase()
+
+            if (action === "getpreviouspage") {
                 var getPreviousPageIndicator = document.getElementById("getPreviousPageIndicator");
                 flashIndicatorColor(getPreviousPageIndicator)
 
@@ -32,7 +53,7 @@
                     updateRows()
                 }
             }
-            else if (event.detail.action === "getNextPage") {
+            else if (action === "getnextpage") {
                 var getNextPageIndicator = document.getElementById("getNextPageIndicator");
                 flashIndicatorColor(getNextPageIndicator)
 
@@ -41,17 +62,21 @@
                     updateRows()
                 }
             }
-            else if (event.detail.action === "createRow") {
+            else if (action === "createrow") {
                 var createRowPageIndicator = document.getElementById("createRowPageIndicator");
                 flashIndicatorColor(createRowPageIndicator)
             }
-            else if (event.detail.action === "updateRow") {
+            else if (action === "updaterow") {
                 var updateRowPageIndicator = document.getElementById("updateRowPageIndicator");
                 flashIndicatorColor(updateRowPageIndicator)
             }
-            else if (event.detail.action === "deleteRow") {
+            else if (action === "deleterow") {
                 var deleteRowPageIndicator = document.getElementById("deleteRowPageIndicator");
                 flashIndicatorColor(deleteRowPageIndicator)
+            }
+            else if (action === "onsave") {
+                var configurationOnSavePageIndicator = document.getElementById("configOnSavePageIndicator");
+                flashIndicatorColor(configurationOnSavePageIndicator)
             }
         });
     </script>
@@ -61,17 +86,26 @@
     <div class="container">
         <div class="top-container">
             <div>
-                <button>Cell</button>
-                <button>Table</button>
-                <button>Configuration</button>
+                <button onclick="selectViewTabIndex(0)">Cell</button>
+                <button onclick="selectViewTabIndex(1)">Table</button>
+                <button onclick="selectViewTabIndex(2)">Configuration</button>
             </div>
 
             <div>
                 <button id="lightThemeButton">Light Mode</button>
                 <button id="darkThemeButton">Dark Mode</button>
             </div>
+
+            <!-- Cell Switchboard -->
+            <div class="cell-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+                <div style="display: flex; align-items: center;">
+                    <div id="cellUpdateCellPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <p style="margin: 0;">updateCell</p>
+                </div>
+            </div>
     
-            <div style="align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+            <!-- Table Switchboard -->
+            <div class="table-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
                 <div style="display: flex; align-items: center;">
                     <div id="createRowPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
                     <p style="margin: 0;">createRow</p>
@@ -97,6 +131,14 @@
                     <p style="margin: 0;">getNextPage</p>
                 </div>
             </div>
+
+            <!-- Configuration Switchboard -->
+            <div class="configuration-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+                <div style="display: flex; align-items: center;">
+                    <div id="configOnSavePageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <p style="margin: 0;">onSave</p>
+                </div>
+            </div>
         </div>
 
         <div class="content-container">
@@ -107,6 +149,13 @@
                     metadata=""
                 />
             </div>
+
+            <div class="configuration_container">
+                <outerbase-plugin-table-configuration 
+                    tableValue=""
+                    configuration=""
+                />
+            </div>
         </div>
     </div>
 
@@ -114,19 +163,26 @@
     <script>
         function updateRows() {
             var tableElement = document.querySelector("outerbase-plugin-table");
+            var configurationElement = document.querySelector("outerbase-plugin-table-configuration");
 
+            const start = page * size;
+            const end = start + size;
+            let rowsCopy = carDealership.response.items.slice(start, end);
+            let table = JSON.stringify(rowsCopy)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+            
             if (tableElement) {
-                const start = page * size;
-                const end = start + size;
-
-                let rowsCopy = sampleTable.response.items.slice(start, end);
-                let table = JSON.stringify(rowsCopy)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
                 tableElement.setAttribute("tableValue", table);
+            }
+
+            if (configurationElement) {
+                configurationElement.setAttribute("tableValue", table);
             }
         }
 
         function toggleTheme(theme) {
+            localStorage.setItem("selectedTheme", theme)
             var tableElement = document.querySelector("outerbase-plugin-table");
+            var configurationElement = document.querySelector("outerbase-plugin-table-configuration");
 
             if (tableElement) {
                 let options = {
@@ -134,15 +190,26 @@
                 }
                 let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
                 tableElement.setAttribute("metadata", metadata);
+                configurationElement.setAttribute("metadata", metadata);
             }
         }
 
         document.addEventListener("DOMContentLoaded", function() {
+            let savedViewIndex = localStorage.getItem("selectedViewIndex") ? localStorage.getItem("selectedViewIndex") : 0;
+            selectViewTabIndex(savedViewIndex);
+
+            let savedTheme = localStorage.getItem("selectedTheme") ? localStorage.getItem("selectedTheme") : "light";
+            toggleTheme(savedTheme)
+
             var tableElement = document.querySelector("outerbase-plugin-table");
+            var configurationElement = document.querySelector("outerbase-plugin-table-configuration");
 
             if (tableElement) {
-                let config = JSON.stringify(sampleTableConfiguration)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+                let config = JSON.stringify(carDealershipConfiguration)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
                 tableElement.setAttribute("configuration", config)
+                configurationElement.setAttribute("configuration", config)
+                configurationElement.setAttribute("configuration", config)
+                
                 updateRows()
             }
         });
@@ -155,48 +222,6 @@
             toggleTheme("dark")
         })
     </script>
-
-
-
-    <!-- <div style="width: 100%; height: 40px;">
-        <outerbase-plugin-cell
-            cellValue="password"
-        ></outerbase-plugin-cell>
-
-        <outerbase-plugin-editor
-            cellValue="password"
-        ></outerbase-plugin-editor>
-    </div> -->
-
-    <!-- <outerbase-plugin-table-configuration tableValue='[{"id": 240, "make_id": "Buick", "model": "Century", "year": 2023, "image": "https://images.unsplash.com/photo-1491573510686-b800ae4d955e?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0" }]'></outerbase-plugin-table-configuration> -->
-
-    <!-- Inject the web component here to preview. -->
-    <!-- <div style="width: 100%; height: 40px;">
-        <outerbase-plugin-cell></outerbase-plugin-cell>
-    </div> -->
-
-    <!-- <outerbase-plugin-table
-        configuration='{
-            "imageKey": "image",
-            "titleKey": "title",
-            "descriptionKey": "description",
-            "subtitleKey": "subtitle"
-        }'
-        tableValue='[
-            {
-                "image": "https://ix-www.imgix.net/homepage_hero-image@2x.png?ixlib=js-3.8.0&q=70&w=1800&auto=compress%2Cenhance%2Cformat&dpr=2",
-                "title": "Brayden",
-                "description": "CTO",
-                "subtitle": "Yesterday"
-            },
-            { 
-                "title": "Brandon",
-                "description": "CEO",
-                "subtitle": "Tommorrow"
-            }
-        ]'
-        tableSchemaValue="{}"
-    ></outerbase-plugin-table> -->
 </body>
 
 </html>

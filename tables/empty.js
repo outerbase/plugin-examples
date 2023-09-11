@@ -192,7 +192,7 @@ templateConfiguration.innerHTML = `
 `
 // Can the above div just be a self closing container: <div />
 
-class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
         return observableAttributes
     }
@@ -231,5 +231,5 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 }
 
-window.customElements.define("outerbase-plugin-table-$PLUGIN_ID", OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-configuration-$PLUGIN_ID", OuterbasePluginTableConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)

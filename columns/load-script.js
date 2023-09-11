@@ -176,7 +176,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         var bcrypt = dcodeIO.bcrypt;
         var salt = bcrypt.genSaltSync(10);
         var hash = bcrypt.hashSync("B4c0/\/", salt);
-        console.log('HASH: ', hash)
 
         // var bcrypt = new bCrypt();
         // hashpw('plain password', gensalt(10), function (hashed) {
