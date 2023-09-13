@@ -134,6 +134,10 @@ var decodeAttributeByName = (fromClass, name) => {
 var templateTable = document.createElement("template")
 templateTable.innerHTML = `
 <style>
+    #theme-container {
+        height: 100%;
+    }
+
     #container {
         display: flex;
         flex-direction: column;
@@ -344,11 +348,6 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
                         }),
                     }
                 );
-
-                // triggerEvent(this, {
-                //     action: OuterbaseTableEvent.updateRow,
-                //     value: row
-                // })
             });
         });
 
@@ -534,7 +533,7 @@ templateConfiguration.innerHTML = `
 `
 // Can the above div just be a self closing container: <div />
 
-class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
         return observableAttributes
     }
@@ -647,5 +646,5 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 }
 
-window.customElements.define("outerbase-plugin-table", OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-configuration", OuterbasePluginTableConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)

@@ -104,6 +104,10 @@ const decodeAttributeByName = (fromClass, name) => {
  *  ░░░▀█▀░░▀▀░░▀█▀░░░
  *  ░░░░░░░░░░░░░░░░░░
  *  ░░░░░░░░░░░░░░░░░░
+ * 
+ * Laying out the view that takes over the default spreadsheet layout is this 
+ * table plugin definition. Here is where you should define your DOM layout, styles, 
+ * and logical components to what should be displayed to the user.
  */
 var templateTable = document.createElement("template")
 templateTable.innerHTML = `
@@ -209,7 +213,6 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
         this.config.tableValue = decodeAttributeByName(this, "tableValue")
-
         this.render()
     }
 
