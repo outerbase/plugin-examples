@@ -1,11 +1,11 @@
-var carDealershipConfiguration = {
+export const carDealershipConfiguration = {
     "imageKey": "image",
     "titleKey": "make_id",
     "subtitleKey": "model",
     "descriptionKey": "description"
 }
 
-var carDealership = {
+export const carDealership = {
     "success": true,
     "response": {
         "count": 240,

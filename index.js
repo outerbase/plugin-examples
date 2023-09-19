@@ -1,9 +1,14 @@
+import { carDealership, carDealershipConfiguration } from './sample-data/car-dealership';
+
+import('./sample-data/car-dealership')
+import('./styles.css');
+
 var page = 0;
 var size = 13;
 
 const allowedScripts = ['column', 'table', 'configuration']
 
-const refreshPage = (index) => {
+window.refreshPage = (index) => {
     localStorage.setItem('selectedViewIndex', index);
     // You're not allowed to window.customElements.define the same value
     // So we refresh the page after setting selectedViewIndex
@@ -13,7 +18,7 @@ const refreshPage = (index) => {
         window.location.reload()
     }
 }
-function selectViewTabIndex(index) {
+window.selectViewTabIndex = (index) => {
     index = Number(index)
     
     toggleScripts(index <= allowedScripts.length ? allowedScripts[index] : allowedScripts[allowedScripts.length])
@@ -36,17 +41,6 @@ function selectViewTabIndex(index) {
 }
 
 function toggleScripts(type) {
-    // Get the script elements by their IDs
-    const script1 = document.getElementById('script-column');
-    const script2 = document.getElementById('script-table');
-    console.log(script1)
-    console.log(script2)
-    
-    if (script1) script1.remove();
-    if (script2) script2.remove();
-    console.log(script1,' after')
-    console.log(script2, 'after')
-    // Check which script is currently in the DOM
     if (type === 'column') {
         import('./_playground/column.js')
     } else if (type === 'table') {
@@ -64,7 +58,6 @@ function flashIndicatorColor(element) {
 
 document.addEventListener('custom-change', function(event) {
     let action = event.detail.action.toLowerCase()
-    console.log('An action!', action)
     if (action === "getpreviouspage") {
         var getPreviousPageIndicator = document.getElementById("getPreviousPageIndicator");
         flashIndicatorColor(getPreviousPageIndicator)
@@ -104,3 +97,65 @@ document.addEventListener('custom-change', function(event) {
         flashIndicatorColor(configurationOnSavePageIndicator)
     }
 });
+
+function updateRows() {
+    var tableElement = document.querySelector("outerbase-plugin-table");
+    var configurationElement = document.querySelector("outerbase-plugin-configuration");
+
+    const start = page * size;
+    const end = start + size;
+    let rowsCopy = carDealership.response.items.slice(start, end);
+    let table = JSON.stringify(rowsCopy)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    
+    if (tableElement) {
+        tableElement.setAttribute("tableValue", table);
+    }
+
+    if (configurationElement) {
+        configurationElement.setAttribute("tableValue", table);
+    }
+}
+
+function toggleTheme(theme) {
+    localStorage.setItem("selectedTheme", theme)
+    var tableElement = document.querySelector("outerbase-plugin-table");
+    var configurationElement = document.querySelector("outerbase-plugin-configuration");
+
+    if (tableElement) {
+        let options = {
+            theme: theme
+        }
+        let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+        tableElement.setAttribute("metadata", metadata);
+        configurationElement.setAttribute("metadata", metadata);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    let savedViewIndex = localStorage.getItem("selectedViewIndex") ? localStorage.getItem("selectedViewIndex") : 0;
+    selectViewTabIndex(savedViewIndex);
+
+    let savedTheme = localStorage.getItem("selectedTheme") ? localStorage.getItem("selectedTheme") : "light";
+    toggleTheme(savedTheme)
+
+    var tableElement = document.querySelector("outerbase-plugin-table");
+    var configurationElement = document.querySelector("outerbase-plugin-configuration");
+
+    if (tableElement) {
+        let config = JSON.stringify(carDealershipConfiguration)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+        tableElement.setAttribute("configuration", config)
+        configurationElement.setAttribute("configuration", config)
+        configurationElement.setAttribute("configuration", config)
+        
+        updateRows()
+    }
+});
+
+// These need to be defered because it needs to wait for the document to be loaded
+// document.getElementById("lightThemeButton").addEventListener("click", function() {
+//     toggleTheme("light")
+// })
+
+// document.getElementById("darkThemeButton").addEventListener("click", function() {
+//     toggleTheme("dark")
+// })  

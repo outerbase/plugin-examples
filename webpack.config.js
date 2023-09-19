@@ -14,21 +14,21 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'My App',
-            filename: './index.html',
-            template: './index.html'
+            template: './index.html',
+            scriptLoading: 'blocking',
+            inject: 'head'
         })
     ],
     devServer: {
         static: {
-          directory: path.join(__dirname),
+            directory: path.join(__dirname),
         },
         compress: true,
         port: 8080,
-      },
-    
+    },
+
     output: {
-        path: path.resolve(__dirname),
+        path: path.resolve(__dirname, 'dist'),
     },
 
 

@@ -2,22 +2,18 @@
 <head>
     <title>Web Component Previewer</title>
 
-    <!-- Sample Data Sets -->
-    <script src="./sample-data/car-dealership.js"></script>
-
     <!-- Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 
-    <script src="index.js"></script>
 </head>
 
 <body>
     <div class="container">
         <div class="top-container">
             <div>
-                <button onclick="refreshPage(0); selectViewTabIndex(0)">Cell</button>
-                <button onclick="refreshPage(1); selectViewTabIndex(1)">Table</button>
-                <button onclick="refreshPage(2); selectViewTabIndex(2)">Configuration</button>
+                <button onclick="window.refreshPage(0); window.selectViewTabIndex(0)">Cell</button>
+                <button onclick="window.refreshPage(1); window.selectViewTabIndex(1)">Table</button>
+                <button onclick="window.refreshPage(2); window.selectViewTabIndex(2)">Configuration</button>
             </div>
 
             <div>
@@ -112,70 +108,6 @@
             </div>
         </div>
     </div>
-
-
-    <script>
-        function updateRows() {
-            var tableElement = document.querySelector("outerbase-plugin-table");
-            var configurationElement = document.querySelector("outerbase-plugin-configuration");
-
-            const start = page * size;
-            const end = start + size;
-            let rowsCopy = carDealership.response.items.slice(start, end);
-            let table = JSON.stringify(rowsCopy)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-            
-            if (tableElement) {
-                tableElement.setAttribute("tableValue", table);
-            }
-
-            if (configurationElement) {
-                configurationElement.setAttribute("tableValue", table);
-            }
-        }
-
-        function toggleTheme(theme) {
-            localStorage.setItem("selectedTheme", theme)
-            var tableElement = document.querySelector("outerbase-plugin-table");
-            var configurationElement = document.querySelector("outerbase-plugin-configuration");
-
-            if (tableElement) {
-                let options = {
-                    theme: theme
-                }
-                let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-                tableElement.setAttribute("metadata", metadata);
-                configurationElement.setAttribute("metadata", metadata);
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            let savedViewIndex = localStorage.getItem("selectedViewIndex") ? localStorage.getItem("selectedViewIndex") : 0;
-            selectViewTabIndex(savedViewIndex);
-
-            let savedTheme = localStorage.getItem("selectedTheme") ? localStorage.getItem("selectedTheme") : "light";
-            toggleTheme(savedTheme)
-
-            var tableElement = document.querySelector("outerbase-plugin-table");
-            var configurationElement = document.querySelector("outerbase-plugin-configuration");
-
-            if (tableElement) {
-                let config = JSON.stringify(carDealershipConfiguration)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-                tableElement.setAttribute("configuration", config)
-                configurationElement.setAttribute("configuration", config)
-                configurationElement.setAttribute("configuration", config)
-                
-                updateRows()
-            }
-        });
-
-        document.getElementById("lightThemeButton").addEventListener("click", function() {
-            toggleTheme("light")
-        })
-
-        document.getElementById("darkThemeButton").addEventListener("click", function() {
-            toggleTheme("dark")
-        })
-    </script>
 </body>
 
 </html>
