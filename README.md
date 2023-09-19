@@ -2,6 +2,15 @@
 
 This guide helps you create plugins that fit well and look good within the Outerbase platform. Using Tailwind CSS and Web Components, our approach offers flexibility and ease of customization. Here you'll find guidelines on color, typography, and borders, along with tips for using Web Components effectively.
 
+---
+## ⚡ Getting Started
+
+This project uses [npm](https://www.npmjs.com/) and [webpack](https://webpack.js.org/) to supercharge your development and make it easier to see your changes right after you save. Getting things setup is simple!
+1. Install `npm`
+2. Run `npm install`
+3. Run `npm run dev`
+
+Feel free to [read up on how to create a plugin with Outerbase](https://docs.outerbase.com/docs/plugins/introduction) and get started creating your very own plugin! ✨
 
 ---
 
