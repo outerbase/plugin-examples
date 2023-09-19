@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <title>Web Component Previewer</title>
 
@@ -22,60 +23,83 @@
             </div>
 
             <!-- Cell Switchboard -->
-            <div class="cell-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+            <div class="cell-switchboard"
+                style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
                 <div style="display: flex; align-items: center;">
-                    <div id="cellUpdateCellPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="cellUpdateCellPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">updateCell</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="cellOnEditPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="cellOnEditPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">onEdit</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="cellOnStopEditPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="cellOnStopEditPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">onStopEdit</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="cellOnCancelEditPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="cellOnCancelEditPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">onCancelEdit</p>
                 </div>
             </div>
-    
+
             <!-- Table Switchboard -->
-            <div class="table-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+            <div class="table-switchboard"
+                style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
                 <div style="display: flex; align-items: center;">
-                    <div id="createRowPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="createRowPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">createRow</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="updateRowPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="updateRowPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">updateRow</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="deleteRowPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="deleteRowPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">deleteRow</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="getPreviousPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="getPreviousPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">getPreviousPage</p>
                 </div>
 
                 <div style="display: flex; align-items: center;">
-                    <div id="getNextPageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="getNextPageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">getNextPage</p>
                 </div>
             </div>
 
             <!-- Configuration Switchboard -->
-            <div class="configuration-switchboard" style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+            <div class="configuration-switchboard"
+                style="display: none; align-items: center; margin-top: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
                 <div style="display: flex; align-items: center;">
-                    <div id="configOnSavePageIndicator" style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;"></div>
+                    <div id="configOnSavePageIndicator"
+                        style="margin-right: 12px; width: 8px; height: 8px; border-radius: 4px; background-color: red;">
+                    </div>
                     <p style="margin: 0;">onSave</p>
                 </div>
             </div>
@@ -83,31 +107,47 @@
 
         <div class="content-container">
             <div class="table_container">
-                <outerbase-plugin-table
-                    configuration=""
-                    tableValue=""
-                    metadata=""
-                />
+                <outerbase-plugin-table configuration="" tableValue="" metadata="" />
             </div>
 
             <div class="configuration_container">
-                <outerbase-plugin-configuration 
-                    tableValue=""
-                    configuration=""
-                />
+                <outerbase-plugin-configuration tableValue="" configuration="" />
             </div>
 
             <div class="column_container">
                 <div style="width: 200px; height: 36px; border: 1px solid gray; overflow: hidden;">
                     <outerbase-plugin-cell></outerbase-plugin-cell>
                 </div>
-                
+
                 <div style="width: 400px; height: auto; border: 1px solid gray; margin-top: 4px;">
                     <outerbase-plugin-cell-editor></outerbase-plugin-cell-editor>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        const toggleTheme = (theme) => {
+            localStorage.setItem("selectedTheme", theme)
+            var tableElement = document.querySelector("outerbase-plugin-table");
+            var configurationElement = document.querySelector("outerbase-plugin-configuration");
+
+            if (tableElement) {
+                let options = {
+                    theme: theme
+                }
+                let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+                tableElement.setAttribute("metadata", metadata);
+                configurationElement.setAttribute("metadata", metadata);
+            }
+        }
+        document.getElementById("lightThemeButton").addEventListener("click", function () {
+            toggleTheme("light")
+        })
+
+        document.getElementById("darkThemeButton").addEventListener("click", function () {
+            toggleTheme("dark")
+        })  
+    </script>
 </body>
 
 </html>

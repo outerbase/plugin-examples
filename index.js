@@ -116,21 +116,6 @@ function updateRows() {
     }
 }
 
-function toggleTheme(theme) {
-    localStorage.setItem("selectedTheme", theme)
-    var tableElement = document.querySelector("outerbase-plugin-table");
-    var configurationElement = document.querySelector("outerbase-plugin-configuration");
-
-    if (tableElement) {
-        let options = {
-            theme: theme
-        }
-        let metadata = JSON.stringify(options)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-        tableElement.setAttribute("metadata", metadata);
-        configurationElement.setAttribute("metadata", metadata);
-    }
-}
-
 document.addEventListener("DOMContentLoaded", function() {
     let savedViewIndex = localStorage.getItem("selectedViewIndex") ? localStorage.getItem("selectedViewIndex") : 0;
     selectViewTabIndex(savedViewIndex);
@@ -152,10 +137,3 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // These need to be defered because it needs to wait for the document to be loaded
-// document.getElementById("lightThemeButton").addEventListener("click", function() {
-//     toggleTheme("light")
-// })
-
-// document.getElementById("darkThemeButton").addEventListener("click", function() {
-//     toggleTheme("dark")
-// })  
