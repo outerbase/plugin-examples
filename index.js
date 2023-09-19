@@ -1,11 +1,22 @@
 var page = 0;
 var size = 13;
 
+const allowedScripts = ['column', 'table', 'configuration']
+
+const refreshPage = (index) => {
+    localStorage.setItem('selectedViewIndex', index);
+    // You're not allowed to window.customElements.define the same value
+    // So we refresh the page after setting selectedViewIndex
+    // To make sure the customElement is undefined
+    const isNotConfiguration = index <= 1
+    if (isNotConfiguration) {
+        window.location.reload()
+    }
+}
 function selectViewTabIndex(index) {
     index = Number(index)
-    localStorage.setItem('selectedViewIndex', index);
-
-    toggleScripts(index === 0 ? 'column' : index === 1 ? 'table' : 'configuration')
+    
+    toggleScripts(index <= allowedScripts.length ? allowedScripts[index] : allowedScripts[allowedScripts.length])
 
     var cellSwitchboard = document.getElementsByClassName("cell-switchboard")[0];
     var tableSwitchboard = document.getElementsByClassName("table-switchboard")[0];
@@ -37,15 +48,9 @@ function toggleScripts(type) {
     console.log(script2, 'after')
     // Check which script is currently in the DOM
     if (type === 'column') {
-        const newScript2 = document.createElement('script');
-        newScript2.src = './_playground/column.js';
-        newScript2.id = 'script-column';
-        document.body.appendChild(newScript2);
+        import('./_playground/column.js')
     } else if (type === 'table') {
-        const newScript1 = document.createElement('script');
-        newScript1.src = './_playground/table.js';
-        newScript1.id = 'script-table';
-        document.body.appendChild(newScript1);
+        import('./_playground/table.js')
     }
 }
 
@@ -59,7 +64,7 @@ function flashIndicatorColor(element) {
 
 document.addEventListener('custom-change', function(event) {
     let action = event.detail.action.toLowerCase()
-
+    console.log('An action!', action)
     if (action === "getpreviouspage") {
         var getPreviousPageIndicator = document.getElementById("getPreviousPageIndicator");
         flashIndicatorColor(getPreviousPageIndicator)
