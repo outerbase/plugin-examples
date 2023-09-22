@@ -135,5 +135,3 @@ document.addEventListener("DOMContentLoaded", function() {
         updateRows()
     }
 });
-
-// These need to be defered because it needs to wait for the document to be loaded
