@@ -18,14 +18,14 @@ window.refreshPage = (index) => {
 
 window.selectViewTabIndex = (index) => {
     index = Number(index)
-    
+
     toggleScripts(index <= allowedScripts.length ? allowedScripts[index] : allowedScripts[allowedScripts.length])
 
     var cellSwitchboard = document.getElementsByClassName("cell-switchboard")[0];
     var tableSwitchboard = document.getElementsByClassName("table-switchboard")[0];
     var configurationSwitchboard = document.getElementsByClassName("configuration-switchboard")[0];
 
-    cellSwitchboard.style.display = index === 0 ? 'grid' : 'none' ;
+    cellSwitchboard.style.display = index === 0 ? 'grid' : 'none';
     tableSwitchboard.style.display = index === 1 ? 'grid' : 'none';
     configurationSwitchboard.style.display = index === 2 ? 'grid' : 'none';
 
@@ -54,7 +54,7 @@ function flashIndicatorColor(element) {
     }, 2000)
 }
 
-document.addEventListener('custom-change', function(event) {
+document.addEventListener('custom-change', function (event) {
     let action = event.detail.action.toLowerCase()
     if (action === "getpreviouspage") {
         var getPreviousPageIndicator = document.getElementById("getPreviousPageIndicator");
@@ -104,7 +104,7 @@ function updateRows() {
     const end = start + size;
     let rowsCopy = carDealership.response.items.slice(start, end);
     let table = JSON.stringify(rowsCopy)?.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-    
+
     if (tableElement) {
         tableElement.setAttribute("tableValue", table);
     }
@@ -114,7 +114,7 @@ function updateRows() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     let savedViewIndex = localStorage.getItem("selectedViewIndex") ? localStorage.getItem("selectedViewIndex") : 0;
     selectViewTabIndex(savedViewIndex);
 
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function() {
         tableElement.setAttribute("configuration", config)
         configurationElement.setAttribute("configuration", config)
         configurationElement.setAttribute("configuration", config)
-        
+
         updateRows()
     }
 });
