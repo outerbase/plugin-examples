@@ -4,8 +4,7 @@
   "description": "This guide helps you create plugins that fit well and look good within the Outerbase platform. Using Tailwind CSS and Web Components, our approach offers flexibility and ease of customization. Here you'll find guidelines on color, typography, and borders, along with tips for using Web Components effectively.",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server",
-    "build": "webpack build"
+    "dev": "webpack-dev-server"
   },
   "author": "",
   "license": "ISC",
