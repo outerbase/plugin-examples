@@ -1,7 +1,4 @@
-import { carDealership, carDealershipConfiguration } from './sample-data/car-dealership';
-
-import('./sample-data/car-dealership')
-import('./styles.css');
+import { carDealership, carDealershipConfiguration } from './sample-data/car-dealership.js';
 
 var page = 0;
 var size = 13;
@@ -18,6 +15,7 @@ window.refreshPage = (index) => {
         window.location.reload()
     }
 }
+
 window.selectViewTabIndex = (index) => {
     index = Number(index)
     
