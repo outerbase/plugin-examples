@@ -260,7 +260,7 @@ class OuterbasePluginConfiguration_$PLUGIN_ID_COLUMN extends HTMLElement {
         </div>
         `
 
-        const saveButton = this.shadow.getElementById("saveButton");
+        var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
             triggerEvent(this, {
                 action: OuterbaseEvent.onSave,
