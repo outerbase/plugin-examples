@@ -66,8 +66,8 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     // Inputs from Outerbase for us to retain
     tableValue = undefined
     count = 0
-    page = 1
-    offset = 50
+    limit = 0
+    offset = 0
     theme = "light"
 
     // Inputs from the configuration screen
@@ -279,7 +279,12 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     attributeChangedCallback(name, oldValue, newValue) {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
         this.config.tableValue = decodeAttributeByName(this, "tableValue")
-        this.config.theme = decodeAttributeByName(this, "metadata").theme
+
+        let metadata = decodeAttributeByName(this, "metadata")
+        this.config.count = metadata?.count
+        this.config.limit = metadata?.limit
+        this.config.offset = metadata?.offset
+        this.config.theme = metadata?.theme
 
         var element = this.shadow.getElementById("theme-container");
         element.classList.remove("dark")
@@ -313,6 +318,12 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
                 <button id="previousPageButton">Previous Page</button>
                 <button id="nextPageButton">Next Page</button>
             </div>
+        </div>
+
+        <div style="text-align: center; padding-bottom: 100px;">
+            Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
+            <br />
+            You're using the <b>${this.config.theme}</b> theme
         </div>
         `
 
