@@ -18,6 +18,8 @@ var observableAttributes = [
 var OuterbaseEvent = {
     // The user has triggered an action to save updates
     onSave: "onSave",
+    // The user has triggered an action to configure the plugin
+    configurePlugin: "configurePlugin",
 }
 
 var OuterbaseColumnEvent = {
@@ -68,6 +70,8 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     count = 0
     limit = 0
     offset = 0
+    page = 0
+    pageCount = 0
     theme = "light"
 
     // Inputs from the configuration screen
@@ -285,6 +289,8 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
         this.config.limit = metadata?.limit
         this.config.offset = metadata?.offset
         this.config.theme = metadata?.theme
+        this.config.page = metadata?.page
+        this.config.pageCount = metadata?.pageCount
 
         var element = this.shadow.getElementById("theme-container");
         element.classList.remove("dark")
@@ -317,15 +323,25 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
                 <button id="createRowButton">Create New</button>
                 <button id="previousPageButton">Previous Page</button>
                 <button id="nextPageButton">Next Page</button>
+                <button id="configurePluginButton">Configure Plugin</button>
             </div>
         </div>
 
         <div style="text-align: center; padding-bottom: 100px;">
             Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
             <br />
+            Page ${this.config.page} of ${this.config.pageCount}
             You're using the <b>${this.config.theme}</b> theme
         </div>
         `
+
+        
+        var configurePluginButton = this.shadow.getElementById("configurePluginButton");
+        configurePluginButton.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseEvent.configurePlugin
+            })
+        });
 
         const deleteRowButtons = this.shadow.querySelectorAll('.deleteRowButton');
         deleteRowButtons.forEach((btn, index) => {
