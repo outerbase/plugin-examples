@@ -331,6 +331,7 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
             Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
             <br />
             Page ${this.config.page} of ${this.config.pageCount}
+            <br />
             You're using the <b>${this.config.theme}</b> theme
         </div>
         `

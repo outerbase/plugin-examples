@@ -18,6 +18,8 @@ var observableAttributes = [
 var OuterbaseEvent = {
     // The user has triggered an action to save updates
     onSave: "onSave",
+    // The user has triggered an action to configure the plugin
+    configurePlugin: "configurePlugin",
 }
 
 var OuterbaseColumnEvent = {
@@ -66,8 +68,10 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     // Inputs from Outerbase for us to retain
     tableValue = undefined
     count = 0
-    page = 1
-    offset = 50
+    limit = 0
+    offset = 0
+    page = 0
+    pageCount = 0
     theme = "light"
 
     // Inputs from the configuration screen
@@ -134,6 +138,10 @@ var decodeAttributeByName = (fromClass, name) => {
 var templateTable = document.createElement("template")
 templateTable.innerHTML = `
 <style>
+    #theme-container {
+        height: 100%;
+    }
+
     #container {
         display: flex;
         flex-direction: column;
@@ -154,9 +162,6 @@ templateTable.innerHTML = `
         display: flex;
         flex-direction: column;
         background-color: transparent;
-        border: 1px solid rgb(238, 238, 238);
-        border-radius: 4px;
-        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05);
         overflow: clip;
     }
 
@@ -166,6 +171,37 @@ templateTable.innerHTML = `
         padding-top: 100%;
         box-sizing: border-box;
         position: relative;
+    }
+
+    .img-empty {
+        height: 0;
+        overflow: hidden;
+        padding-top: 100%;
+        box-sizing: border-box;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #A3A3A3;
+        background: #171717;
+    }
+
+    .img-empty > div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 21px; 
     }
 
     img {
@@ -178,40 +214,44 @@ templateTable.innerHTML = `
         object-fit: cover;
     }
 
+    .select-column-link {
+        font-weight: 500;
+        text-decoration-line: underline;
+        cursor: pointer;
+    }
+
     .contents {
-        padding: 12px;
+        padding: 12px 0 0 0;
     }
 
     .title {
-        font-weight: bold;
-        font-size: 16px;
-        line-height: 24px;
-        font-family: "Inter", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
         line-clamp: 2;
-        margin-bottom: 8px;
+        margin-bottom: 0;
+    }
+
+    .subtitle {
+        font-size: 12px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
+        font-weight: 400;
     }
 
     .description {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 14px;
-        line-height: 20px;
-        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
 
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;  
         overflow: hidden;
-    }
-
-    .subtitle {
-        font-size: 12px;
-        line-height: 16px;
-        font-family: "Inter", sans-serif;
-        color: gray;
-        font-weight: 300;
-        margin-top: 8px;
     }
 
     p {
@@ -228,17 +268,18 @@ templateTable.innerHTML = `
     @media only screen and (min-width: 768px) {
         .grid-container {
             grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 32px;
         }
     }
 
     @media only screen and (min-width: 1200px) {
         .grid-container {
             grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 20px;
+            gap: 32px;
         }
     }
 
-    @media only screen and (min-width: 1400px) {
+    @media only screen and (min-width: 1600px) {
         .grid-container {
             grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 32px;
@@ -275,7 +316,14 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     attributeChangedCallback(name, oldValue, newValue) {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
         this.config.tableValue = decodeAttributeByName(this, "tableValue")
-        this.config.theme = decodeAttributeByName(this, "metadata").theme
+
+        let metadata = decodeAttributeByName(this, "metadata")
+        this.config.count = metadata?.count
+        this.config.limit = metadata?.limit
+        this.config.offset = metadata?.offset
+        this.config.theme = metadata?.theme
+        this.config.page = metadata?.page
+        this.config.pageCount = metadata?.pageCount
 
         var element = this.shadow.getElementById("theme-container");
         element.classList.remove("dark")
@@ -287,103 +335,49 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     render() {
         this.shadow.querySelector("#container").innerHTML = `
         <div class="grid-container">
-            <h1>Welcome to the Outerbase Car Dealership!<br /><br /><br /><br />View All ></h1>
             ${this.config?.tableValue?.length && this.config?.tableValue?.map((row) => `
                 <div class="grid-item">
-                    <button class="deleteRowButton" style="position: absolute; top: 12px; right: 12px; z-index: 1;">X</button>
-                    ${ this.config.imageKey ? `<div class="img-wrapper"><img src="${row[this.config.imageKey]}" width="100" height="100"></div>` : `` }
+                    ${ (this.config.imageKey && this.isValidURL(row[this.config.imageKey])) 
+                        ? `<div class="img-wrapper"><img src="${row[this.config.imageKey]}" width="100" height="100"></div>` 
+                        : `<div class="img-empty">
+                                <div>
+                                    <div style="flex: 1;"></div>
+                                    <div>No image selected</div>
+                                    <div class="select-column-link">Select column</div>
+                                    <div style="flex: 1;"></div>
+                                </div>
+                            </div>` }
 
                     <div class="contents">
                         ${ this.config.titleKey ? `<p class="title">${row[this.config.titleKey]}</p>` : `` }
                         ${ this.config.subtitleKey ? `<p class="subtitle">${row[this.config.subtitleKey]}</p>` : `` }
                         ${ this.config.descriptionKey ? `<p class="description">${row[this.config.descriptionKey]}</p>` : `` }
-
-                        <button class="markSoldButton" style="margin-top: 12px;">Mark as sold</button>
                     </div>
                 </div>
             `).join("")}
+        </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <h1>What Next?</h1>
-                <button id="createRowButton">Create New</button>
-                <button id="previousPageButton">Previous Page</button>
-                <button id="nextPageButton">Next Page</button>
-            </div>
+        <div style="text-align: center; padding-top: 40px; padding-bottom: 100px;">
+            Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
+            <br />
+            Page ${this.config.page} of ${this.config.pageCount}
+            <br />
+            ${this.config.page > 1 ? `<button id="previousPageButton">Previous Page</button>` : ``}
+            ${this.config.page < this.config.pageCount ? `<button id="nextPageButton">Next Page</button>` : ``}
         </div>
         `
 
-        const deleteRowButtons = this.shadow.querySelectorAll('.deleteRowButton');
-        deleteRowButtons.forEach((btn, index) => {
+        const configurePluginButtons = this.shadow.querySelectorAll('.select-column-link');
+        configurePluginButtons.forEach((btn, index) => {
             btn.addEventListener('click', () => {
-                let row = this.config.tableValue[index]
                 triggerEvent(this, {
-                    action: OuterbaseTableEvent.deleteRow,
-                    value: row
+                    action: OuterbaseEvent.configurePlugin
                 })
-
-                this.config.deletedRows.push(row)
-                this.config.tableValue.splice(index, 1)
-                this.render()
             });
-        });
-
-        const markSoldButtons = this.shadow.querySelectorAll('.markSoldButton');
-        markSoldButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => {
-                let row = this.config.tableValue[index]
-
-                fetch(
-                    "https://adjacent-apricot.cmd.outerbase.io/mark-sold",
-                    {
-                        method: "POST",
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            id: row.id,
-                        }),
-                    }
-                );
-
-                // triggerEvent(this, {
-                //     action: OuterbaseTableEvent.updateRow,
-                //     value: row
-                // })
-            });
-        });
-
-        var createRowButton = this.shadow.getElementById("createRowButton");
-        createRowButton.addEventListener("click", () => {
-            let row = {
-                "id": 0,
-                "make_id": "Outerbase",
-                "model": "Spacecar",
-                "year": 2047,
-                "vin": "SPCMN404NOREGRETS",
-                "color": "Purple",
-                "price": 42069000,
-                "city": "Pittsburgh",
-                "state": "Pennsylvania",
-                "postal": 15203,
-                "longitude": 58.4767,
-                "latitude": -16.1003,
-                "description": "The best space car money can buy.",
-                "seller": "mr_base",
-                "seller_name": "Outer Base",
-                "image": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0",
-                "image_thumb": "https://images.unsplash.com/photo-1506469717960-433cebe3f181?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjEzMjA3NH0"
-            }
-            this.config.tableValue.push(row)
-            this.render()
-            
-            triggerEvent(this, {
-                action: OuterbaseTableEvent.createRow,
-                value: row
-            })
         });
 
         var previousPageButton = this.shadow.getElementById("previousPageButton");
-        previousPageButton.addEventListener("click", () => {
+        previousPageButton?.addEventListener("click", () => {
             triggerEvent(this, {
                 action: OuterbaseTableEvent.getPreviousPage,
                 value: {}
@@ -391,12 +385,22 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
         });
 
         var nextPageButton = this.shadow.getElementById("nextPageButton");
-        nextPageButton.addEventListener("click", () => {
+        nextPageButton?.addEventListener("click", () => {
             triggerEvent(this, {
                 action: OuterbaseTableEvent.getNextPage,
                 value: {}
             })
         });
+    }
+
+    isValidURL(string) {
+        try {
+            new URL(string);
+        } catch (_) {
+            return false;  
+        }
+
+        return true;
     }
 }
 
@@ -534,7 +538,7 @@ templateConfiguration.innerHTML = `
 `
 // Can the above div just be a self closing container: <div />
 
-class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
         return observableAttributes
     }
@@ -647,5 +651,5 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 }
 
-window.customElements.define("outerbase-plugin-table", OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-configuration", OuterbasePluginTableConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table', OuterbasePluginTable_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration', OuterbasePluginConfiguration_$PLUGIN_ID)

@@ -1,13 +1,150 @@
-var privileges = [
-    'tableValue',
-    'configuration',
+var observableAttributes = [
+    // The value of the cell that the plugin is being rendered in
+    "cellvalue",
+    // The value of the row that the plugin is being rendered in
+    "rowvalue",
+    // The value of the table that the plugin is being rendered in
+    "tablevalue",
+    // The schema of the table that the plugin is being rendered in
+    "tableschemavalue",
+    // The schema of the database that the plugin is being rendered in
+    "databaseschemavalue",
+    // The configuration object that the user specified when installing the plugin
+    "configuration",
+    // Additional information about the view such as count, page and offset.
+    "metadata"
 ]
 
-var templateTable = document.createElement('template')
+var OuterbaseEvent = {
+    // The user has triggered an action to save updates
+    onSave: "onSave",
+    // The user has triggered an action to configure the plugin
+    configurePlugin: "configurePlugin",
+}
+
+var OuterbaseColumnEvent = {
+    // The user has began editing the selected cell
+    onEdit: "onEdit",
+    // Stops editing a cells editor popup view and accept the changes
+    onStopEdit: "onStopEdit",
+    // Stops editing a cells editor popup view and prevent persisting the changes
+    onCancelEdit: "onCancelEdit",
+    // Updates the cells value with the provided value
+    updateCell: "updateCell",
+}
+
+var OuterbaseTableEvent = {
+    // Updates the value of a row with the provided JSON value
+    updateRow: "updateRow",
+    // Deletes an entire row with the provided JSON value
+    deleteRow: "deleteRow",
+    // Creates a new row with the provided JSON value
+    createRow: "createRow",
+    // Performs an action to get the next page of results, if they exist
+    getNextPage: "getNextPage",
+    // Performs an action to get the previous page of results, if they exist
+    getPreviousPage: "getPreviousPage"
+}
+
+/**
+ * ******************
+ * Custom Definitions
+ * ******************
+ * 
+ *  ░░░░░░░░░░░░░░░░░
+ *  ░░░░▄▄████▄▄░░░░░
+ *  ░░░██████████░░░░
+ *  ░░░██▄▄██▄▄██░░░░
+ *  ░░░░▄▀▄▀▀▄▀▄░░░░░
+ *  ░░░▀░░░░░░░░▀░░░░
+ *  ░░░░░░░░░░░░░░░░░
+ * 
+ * Define your custom classes here. We do recommend the usage of our `OuterbasePluginConfig_$PLUGIN_ID`
+ * class for you to manage properties between the other classes below, however, it's strictly optional.
+ * However, this would be a good class to contain the properties you need to store when a user installs
+ * or configures your plugin.
+ */
+class OuterbasePluginConfig_$PLUGIN_ID {
+    // Inputs from Outerbase for us to retain
+    tableValue = undefined
+    count = 0
+    limit = 0
+    offset = 0
+    page = 0
+    pageCount = 0
+    theme = "light"
+
+    // Inputs from the configuration screen
+    imageKey = undefined
+    optionalImagePrefix = undefined
+    titleKey = undefined
+    descriptionKey = undefined
+    subtitleKey = undefined
+
+    // Variables for us to hold state of user actions
+    deletedRows = []
+
+    constructor(object) {
+        this.imageKey = object?.imageKey
+        this.optionalImagePrefix = object?.optionalImagePrefix
+        this.titleKey = object?.titleKey
+        this.descriptionKey = object?.descriptionKey
+        this.subtitleKey = object?.subtitleKey
+    }
+
+    toJSON() {
+        return {
+            "imageKey": this.imageKey,
+            "imagePrefix": this.optionalImagePrefix,
+            "titleKey": this.titleKey,
+            "descriptionKey": this.descriptionKey,
+            "subtitleKey": this.subtitleKey
+        }
+    }
+}
+
+var triggerEvent = (fromClass, data) => {
+    const event = new CustomEvent("custom-change", {
+        detail: data,
+        bubbles: true,
+        composed: true
+    });
+
+    fromClass.dispatchEvent(event);
+}
+
+var decodeAttributeByName = (fromClass, name) => {
+    const encodedJSON = fromClass.getAttribute(name);
+    const decodedJSON = encodedJSON
+        ?.replace(/&quot;/g, '"')
+        ?.replace(/&#39;/g, "'");
+    return decodedJSON ? JSON.parse(decodedJSON) : {};
+}
+
+
+/**
+ * **********
+ * Table View
+ * **********
+ * 
+ *  ░░░░░░░░░░░░░░░░░░
+ *  ░░░░░▄▄████▄▄░░░░░
+ *  ░░░▄██████████▄░░░
+ *  ░▄██▄██▄██▄██▄██▄░
+ *  ░░░▀█▀░░▀▀░░▀█▀░░░
+ *  ░░░░░░░░░░░░░░░░░░
+ *  ░░░░░░░░░░░░░░░░░░
+ */
+var templateTable = document.createElement("template")
 templateTable.innerHTML = `
 <style>
+    #theme-container {
+        height: 100%;
+    }
+
     #container {
         display: flex;
+        flex-direction: column;
         height: 100%;
         overflow-y: scroll;
     }
@@ -18,16 +155,13 @@ templateTable.innerHTML = `
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
         padding: 12px;
-        height: calc(100% - 24px);
     }
 
     .grid-item {
+        position: relative;
         display: flex;
         flex-direction: column;
         background-color: transparent;
-        border: 1px solid rgb(238, 238, 238);
-        border-radius: 4px;
-        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05);
         overflow: clip;
     }
 
@@ -37,6 +171,37 @@ templateTable.innerHTML = `
         padding-top: 100%;
         box-sizing: border-box;
         position: relative;
+    }
+
+    .img-empty {
+        height: 0;
+        overflow: hidden;
+        padding-top: 100%;
+        box-sizing: border-box;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #A3A3A3;
+        background: #171717;
+    }
+
+    .img-empty > div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        font-family: "Inter", sans-serif;
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 21px; 
     }
 
     img {
@@ -49,26 +214,39 @@ templateTable.innerHTML = `
         object-fit: cover;
     }
 
+    .select-column-link {
+        font-weight: 500;
+        text-decoration-line: underline;
+        cursor: pointer;
+    }
+
     .contents {
-        padding: 12px;
+        padding: 12px 0 0 0;
     }
 
     .title {
-        font-weight: bold;
-        font-size: 16px;
-        line-height: 24px;
-        font-family: "Inter", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
         line-clamp: 2;
-        margin-bottom: 8px;
+        margin-bottom: 0;
+    }
+
+    .subtitle {
+        font-size: 12px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
+        font-weight: 400;
     }
 
     .description {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 14px;
-        line-height: 20px;
-        font-family: "Inter", sans-serif;
+        font-size: 12px;
+        line-height: 21px;
+        font-family: "Menlo", sans-serif;
 
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -76,119 +254,184 @@ templateTable.innerHTML = `
         overflow: hidden;
     }
 
-    .subtitle {
-        font-size: 12px;
-        line-height: 16px;
-        font-family: "Inter", sans-serif;
-        color: gray;
-        font-weight: 300;
-        margin-top: 8px;
-    }
-
     p {
         margin: 0;
     }
-    
-    @media (prefers-color-scheme: dark) {
-        .grid-item {
-            border: 1px solid rgb(52, 52, 56);
+
+    .dark {
+        #container {
+            background-color: black;
             color: white;
+        }
+    }
+
+    @media only screen and (min-width: 768px) {
+        .grid-container {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 32px;
+        }
+    }
+
+    @media only screen and (min-width: 1200px) {
+        .grid-container {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 32px;
+        }
+    }
+
+    @media only screen and (min-width: 1600px) {
+        .grid-container {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 32px;
         }
     }
 </style>
 
-<div id="container">
-    
+<div id="theme-container">
+    <div id="container">
+        
+    </div>
 </div>
 `
-
-class OuterbasePluginConfig_$PLUGIN_ID {
-    imageKey = undefined
-    titleKey = undefined
-    descriptionKey = undefined
-    subtitleKey = undefined
-
-    constructor(object) {
-        this.imageKey = object?.imageKey
-        this.titleKey = object?.titleKey
-        this.descriptionKey = object?.descriptionKey
-        this.subtitleKey = object?.subtitleKey
-    }
-
-    toJSON() {
-        return {
-            "imageKey": this.imageKey,
-            "titleKey": this.titleKey,
-            "descriptionKey": this.descriptionKey,
-            "subtitleKey": this.subtitleKey
-        }
-    }
-}
+// Can the above div just be a self closing container: <div />
 
 class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return observableAttributes
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
-    items = []
 
     constructor() {
         super()
 
-        this.shadow = this.attachShadow({ mode: 'open' })
+        this.shadow = this.attachShadow({ mode: "open" })
         this.shadow.appendChild(templateTable.content.cloneNode(true))
     }
 
     connectedCallback() {
-        const encodedTableJSON = this.getAttribute('configuration');
-        const decodedTableJSON = encodedTableJSON
-            ?.replace(/&quot;/g, '"')
-            ?.replace(/&#39;/g, "'");
-        const configuration = JSON.parse(decodedTableJSON);
+        this.render()
+    }
 
-        if (configuration) {
-            this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-                configuration
-            )
-        }
+    attributeChangedCallback(name, oldValue, newValue) {
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
+        this.config.tableValue = decodeAttributeByName(this, "tableValue")
 
-        // Set the items property to the value of the `tableValue` attribute.
-        if (this.getAttribute('tableValue')) {
-            const encodedTableJSON = this.getAttribute('tableValue');
-            const decodedTableJSON = encodedTableJSON
-                ?.replace(/&quot;/g, '"')
-                ?.replace(/&#39;/g, "'");
-            this.items = JSON.parse(decodedTableJSON);
-        }
+        let metadata = decodeAttributeByName(this, "metadata")
+        this.config.count = metadata?.count
+        this.config.limit = metadata?.limit
+        this.config.offset = metadata?.offset
+        this.config.theme = metadata?.theme
+        this.config.page = metadata?.page
+        this.config.pageCount = metadata?.pageCount
 
-        // Manually render dynamic content
+        var element = this.shadow.getElementById("theme-container");
+        element.classList.remove("dark")
+        element.classList.add(this.config.theme);
+
         this.render()
     }
 
     render() {
-        this.shadow.querySelector('#container').innerHTML = `
+        this.shadow.querySelector("#container").innerHTML = `
         <div class="grid-container">
-            ${this.items.map((item) => `
+            ${this.config?.tableValue?.length && this.config?.tableValue?.map((row) => `
                 <div class="grid-item">
-                    ${ this.config.imageKey ? `<div class="img-wrapper"><img src="${item[this.config.imageKey]}" width="100" height="100"></div>` : `` }
+                    ${ (this.config.imageKey && this.isValidURL(row[this.config.imageKey])) 
+                        ? `<div class="img-wrapper"><img src="${row[this.config.imageKey]}" width="100" height="100"></div>` 
+                        : `<div class="img-empty">
+                                <div>
+                                    <div style="flex: 1;"></div>
+                                    <div>No image selected</div>
+                                    <div class="select-column-link">Select column</div>
+                                    <div style="flex: 1;"></div>
+                                </div>
+                            </div>` }
 
                     <div class="contents">
-                        ${ this.config.titleKey ? `<p class="title">${item[this.config.titleKey]}</p>` : `` }
-                        ${ this.config.descriptionKey ? `<p class="description">${item[this.config.descriptionKey]}</p>` : `` }
-                        ${ this.config.subtitleKey ? `<p class="subtitle">${item[this.config.subtitleKey]}</p>` : `` }
+                        ${ this.config.titleKey ? `<p class="title">${row[this.config.titleKey]}</p>` : `` }
+                        ${ this.config.subtitleKey ? `<p class="subtitle">${row[this.config.subtitleKey]}</p>` : `` }
+                        ${ this.config.descriptionKey ? `<p class="description">${row[this.config.descriptionKey]}</p>` : `` }
                     </div>
                 </div>
             `).join("")}
         </div>
+
+        <div style="text-align: center; padding-top: 40px; padding-bottom: 100px;">
+            Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
+            <br />
+            Page ${this.config.page} of ${this.config.pageCount}
+            <br />
+            ${this.config.page > 1 ? `<button id="previousPageButton">Previous Page</button>` : ``}
+            ${this.config.page < this.config.pageCount ? `<button id="nextPageButton">Next Page</button>` : ``}
+        </div>
         `
+
+        const configurePluginButtons = this.shadow.querySelectorAll('.select-column-link');
+        configurePluginButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                triggerEvent(this, {
+                    action: OuterbaseEvent.configurePlugin
+                })
+            });
+        });
+
+        var previousPageButton = this.shadow.getElementById("previousPageButton");
+        previousPageButton?.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseTableEvent.getPreviousPage,
+                value: {}
+            })
+        });
+
+        var nextPageButton = this.shadow.getElementById("nextPageButton");
+        nextPageButton?.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseTableEvent.getNextPage,
+                value: {}
+            })
+        });
+    }
+
+    isValidURL(string) {
+        try {
+            new URL(string);
+        } catch (_) {
+            return false;  
+        }
+
+        return true;
     }
 }
 
-var templateConfiguration = document.createElement('template')
+
+/**
+ * ******************
+ * Configuration View
+ * ******************
+ * 
+ *  ░░░░░░░░░░░░░░░░░
+ *  ░░░░░▀▄░░░▄▀░░░░░
+ *  ░░░░▄█▀███▀█▄░░░░
+ *  ░░░█▀███████▀█░░░
+ *  ░░░█░█▀▀▀▀▀█░█░░░
+ *  ░░░░░░▀▀░▀▀░░░░░░
+ *  ░░░░░░░░░░░░░░░░░
+ * 
+ * When a user either installs a plugin onto a table resource for the first time
+ * or they configure an existing installation, this is the view that is presented
+ * to the user. For many plugin applications it's essential to capture information
+ * that is required to allow your plugin to work correctly and this is the best
+ * place to do it.
+ * 
+ * It is a requirement that a save button that triggers the `OuterbaseEvent.onSave`
+ * event exists so Outerbase can complete the installation or preference update
+ * action.
+ */
+var templateConfiguration = document.createElement("template")
 templateConfiguration.innerHTML = `
 <style>
-    #container {
+    #configuration-container {
         display: flex;
         height: 100%;
         overflow-y: scroll;
@@ -220,6 +463,18 @@ templateConfiguration.innerHTML = `
         appearance: none;
         -webkit-appearance: none !important;
         -moz-appearance: none !important;
+    }
+
+    input {
+        width: 320px;
+        height: 40px;
+        margin-bottom: 16px;
+        background: transparent;
+        border: 1px solid #343438;
+        border-radius: 8px;
+        color: black;
+        font-size: 14px;
+        padding: 0 8px;
     }
 
     button {
@@ -258,73 +513,76 @@ templateConfiguration.innerHTML = `
         margin: 0;
     }
 
-    @media (prefers-color-scheme: dark) {
-        select {
+    .dark {
+        #configuration-container {
+            background-color: black;
             color: white;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="32"><path fill="white" d="M480-380 276-584l16-16 188 188 188-188 16 16-204 204Z"/></svg>');
         }
+    }
+
+    .dark > div > div> input {
+        color: white !important;
+    }
+
+    .dark > div > div> select {
+        color: white !important;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="32"><path fill="white" d="M480-380 276-584l16-16 188 188 188-188 16 16-204 204Z"/></svg>');
     }
 </style>
 
-<div id="container">
-    
+<div id="theme-container">
+    <div id="configuration-container">
+        
+    </div>
 </div>
 `
+// Can the above div just be a self closing container: <div />
 
-class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return observableAttributes
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
-    items = []
 
     constructor() {
         super()
 
-        // The shadow DOM is a separate DOM tree that is attached to the element.
-        // This allows us to encapsulate our styles and markup. It also prevents
-        // styles from the parent page from leaking into our plugin.
-        this.shadow = this.attachShadow({ mode: 'open' })
+        this.shadow = this.attachShadow({ mode: "open" })
         this.shadow.appendChild(templateConfiguration.content.cloneNode(true))
     }
 
     connectedCallback() {
-        // Parse the configuration object from the `configuration` attribute
-        // and store it in the `config` property.
-        const encodedTableJSON = this.getAttribute('configuration');
-        const decodedTableJSON = encodedTableJSON
-            ?.replace(/&quot;/g, '"')
-            ?.replace(/&#39;/g, "'");
-        const configuration = JSON.parse(decodedTableJSON);
+        this.render()
+    }
 
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            configuration
-        )
+    attributeChangedCallback(name, oldValue, newValue) {
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
+        this.config.tableValue = decodeAttributeByName(this, "tableValue")
+        this.config.theme = decodeAttributeByName(this, "metadata").theme
 
-        // Set the items property to the value of the `tableValue` attribute.
-        if (this.getAttribute('tableValue')) {
-            const encodedTableJSON = this.getAttribute('tableValue');
-            const decodedTableJSON = encodedTableJSON
-                ?.replace(/&quot;/g, '"')
-                ?.replace(/&#39;/g, "'");
-            this.items = JSON.parse(decodedTableJSON);
-        }
+        var element = this.shadow.getElementById("theme-container");
+        element.classList.remove("dark")
+        element.classList.add(this.config.theme);
 
-        // Manually render dynamic content
         this.render()
     }
 
     render() {
-        let sample = this.items.length ? this.items[0] : {}
+        let sample = this.config.tableValue.length ? this.config.tableValue[0] : {}
         let keys = Object.keys(sample)
 
-        this.shadow.querySelector('#container').innerHTML = `
+        if (!keys || keys.length === 0 || !this.shadow.querySelector('#configuration-container')) return
+
+        this.shadow.querySelector('#configuration-container').innerHTML = `
         <div style="flex: 1;">
             <p class="field-title">Image Key</p>
             <select id="imageKeySelect">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.imageKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
+
+            <p class="field-title">Image URL Prefix (optional)</p>
+            <input type="text" value="" />
 
             <p class="field-title">Title Key</p>
             <select id="titleKeySelect">
@@ -346,7 +604,7 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
             </div>
         </div>
 
-        <div>
+        <div style="position: relative;">
             <div class="preview-card">
                 <img src="${sample[this.config.imageKey]}" width="100" height="100">
 
@@ -361,8 +619,8 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            this.callCustomEvent({
-                action: 'onsave',
+            triggerEvent(this, {
+                action: OuterbaseEvent.onSave,
                 value: this.config.toJSON()
             })
         });
@@ -391,17 +649,9 @@ class OuterbasePluginTableConfiguration_$PLUGIN_ID extends HTMLElement {
             this.render()
         });
     }
-
-    callCustomEvent(data) {
-        const event = new CustomEvent('custom-change', {
-            detail: data,
-            bubbles: true,  // If you want the event to bubble up through the DOM
-            composed: true  // Allows the event to pass through shadow DOM boundaries
-        });
-
-        this.dispatchEvent(event);
-    }
 }
 
-window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-table-configuration-$PLUGIN_ID', OuterbasePluginTableConfiguration_$PLUGIN_ID)
+// window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
+// window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table-gallery', OuterbasePluginTable_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-gallery', OuterbasePluginConfiguration_$PLUGIN_ID)
