@@ -33,10 +33,10 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     font-family: 'Inter', sans-serif;
     width: 430px;
     height: 585px;
-    color: white;
+    color: var(--ob-text-color);
     border-radius: 20px;
-    border: 1px solid var(--neutral-800, #262626);
-    background: var(--neutral-900, #171717);
+    border: 1px solid var(--ob-border-color);
+    background: var(--ob-background-color);
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);  
 }
 #top-calendar {
@@ -81,11 +81,24 @@ li {
 #close-editor {
     width: 24px;
     height: 24px;
+    cursor: pointer;
+}
+#close-editor:hover {
+    opacity: .5;
+}
+.active {
+    border-radius: 32px;
+    background: var(--neutral-50, #FAFAFA);
+    color: black;
+}
+.navigation-arrows:hover {
+    opacity: .5;
 }
 .navigation-arrows {
     width: 14px;
     height: 14px;
     padding: 16px;
+    cursor: pointer;
 }
 #date-container {
     width: 68px;
@@ -123,7 +136,7 @@ li {
     </div>
     <div id="bottom-calendar">
        <ul class="day-names">
-            <li>Mo</li>
+            <li class="ob-secondary-button">Mo</li>
             <li>Tu</li>
             <li>We</li>
             <li>Th</li>
@@ -213,8 +226,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             previousMonth = month - 1
         }
 
-
-
         const daysOfPreviousMonth = daysInMonth(previousMonth, previousYear)
         for (let fillDay = 1; fillDay < daysTillFirstOfMonth; fillDay++) {
             const displayDay = daysOfPreviousMonth - daysTillFirstOfMonth + fillDay
@@ -222,15 +233,19 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayFormatted = displayDay.toString().padStart(2, '0')
 
             const dateFormat = `${previousYear}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(displayDay.toString(), false, dateFormat, this.shadow)
+            const dayElement = dayElementMaker(displayDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
         for (let day = 1; day <= totalDays; day++) {
+
             const monthFormatted = (month + 1).toString().padStart(2, '0')
             const dayFormatted = day.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(day.toString(), true, dateFormat, this.shadow)
+            const cellValue = this.getAttribute('cellvalue')
+            const cellAsDate = new Date(cellValue)
+            const isActive = day === cellAsDate.getDate()
+            const dayElement = dayElementMaker(day.toString(), true, dateFormat, this.shadow, isActive)
             daysElement.appendChild(dayElement)
         }
 
@@ -240,7 +255,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const monthFormatted = (month + 2).toString().padStart(2, '0')
             const dayFormatted = monthAfterDay.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow)
+            const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
@@ -248,14 +263,18 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
 }
 
-const dayElementMaker = (display: string, focus: boolean, value: any, shadow: ShadowRoot) => {
+const dayElementMaker = (display: string, focus: boolean, value: any, shadow: ShadowRoot, isActive: boolean) => {
     const dayElement = document.createElement('li')
     dayElement.innerHTML = display
     dayElement.style.opacity = focus ? '1' : '.5'
+    dayElement.style.cursor = 'pointer'
+    dayElement.className = isActive ? "active" : ""
     dayElement.onclick = (event) => {
-        const ev = createOuterbaseEvent({ action: 'updatecell', value })
-        sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: ev })
+        const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
+        sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: updateCellEvent })
 
+        const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
+        sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: stopEditingEvent })
     }
     return dayElement
 }
@@ -304,7 +323,7 @@ const addForwardButtonFunctinoality = (outerbasePluginEditor: OuterbasePluginEdi
 const addCloseButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const closeEditorElement = outerbasePluginEditor.shadow.getElementById('close-editor')
     closeEditorElement.onclick = () => {
-        const ev = createOuterbaseEvent({ action: 'onedit', value: true })
+        const ev = createOuterbaseEvent({ action: 'onstopedit', value: true })
         sendToOuterbase({ outerbaseElement: closeEditorElement, outerbaseEvent: ev })
     }
 }
