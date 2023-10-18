@@ -5,6 +5,9 @@ const privileges = [
 
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
     #container { 
         display: flex;
@@ -14,6 +17,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
         height: 100%;
         width: calc(100% - 16px);
         padding: 0 8px;
+        font-family: var(--ob-font-family), sans-serif;
     }
     input {
         height: 100%;
@@ -28,10 +32,13 @@ templateCell_$PLUGIN_ID.innerHTML = `
     input:focus {
         outline: none;
     }
+    #view-image {
+        background-color: var(--ob-background-color)
+    }
 </style>
 <div id="container">
     <input type="text" id="jsonValue" placeholder="Enter JSON...">
-    <button id="view-image">{ }</button>
+    <button id="view-image">{;}</button>
 </div>
 `
 
@@ -130,9 +137,13 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         });
 
         jsonValue.addEventListener("keydown", (e) => {
+            if (e.code == "Enter" && e.shiftKey) {
+                return
+            }
             if (e.code != "Enter") {
                 return
             }
+
 
             this.callCustomEvent({
                 action: 'updatecell',
