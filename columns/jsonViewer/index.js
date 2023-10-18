@@ -69,82 +69,12 @@ templateEditor_$PLUGIN_ID.innerHTML = `
 </div>
 `
 
-
-
-// This is the configuration object that Outerbase passes to your plugin.
-// Define all of the configuration options that your plugin requires here.
+// No Configuration needed
 class OuterbasePluginConfig_$PLUGIN_ID {
     constructor(object) {
-        this.example = "Caleb"
     }
 }
 
-var templateConfiguration = document.createElement("template")
-templateConfiguration.innerHTML = `
-<style>
-    #container {
-        display: flex;
-        height: 100%;
-        overflow-y: scroll;
-        padding: 40px 50px 65px 40px;
-    }
-</style>
-<div id="container">
-    
-</div>
-`
-// Can the above div just be a self closing container: <div />
-
-var decodeAttributeByName = (fromClass, name) => {
-    const encodedJSON = fromClass.getAttribute(name);
-    const decodedJSON = encodedJSON
-        ?.replace(/&quot;/g, '"')
-        ?.replace(/&#39;/g, "'");
-    return decodedJSON ? JSON.parse(decodedJSON) : {};
-}
-
-class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
-    static get observedAttributes() {
-        return observableAttributes
-    }
-
-    constructor() {
-        super()
-
-        this.shadow = this.attachShadow({ mode: "open" })
-        this.shadow.appendChild(templateConfiguration.content.cloneNode(true))
-    }
-
-    connectedCallback() {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            JSON.parse(this.getAttribute('configuration'))
-        )
-
-        this.config.tableValue = decodeAttributeByName(this, "tableValue")
-        this.render()
-    }
-
-    render() {
-        this.shadow.querySelector("#container").innerHTML = `
-        <div>
-            <h1>Hello, Configuration World!</h1>
-            <button id="saveButton">Save View</button>
-        </div>
-        `
-
-        var saveButton = this.shadow.getElementById("saveButton");
-        saveButton.addEventListener("click", () => {
-            this.callCustomEvent({
-                action: "onSave",
-                value: this.config
-            })
-        });
-    }
-    callCustomEvent(data) {
-        const event = createCustomEvent(data)
-        this.dispatchEvent(event);
-    }
-}
 
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
