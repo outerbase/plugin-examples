@@ -20,6 +20,19 @@ const daysInMonth = (month: number, year: number) => new Date(year, month + 1, 0
 
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
+<style>
+input {
+    height: 100%;
+    flex: 1;
+    background-color: transparent;
+    border: 0;
+    min-width: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+</style>
 <div id="container">
     <input type="text" id="dateDisplay" />
 </div>
