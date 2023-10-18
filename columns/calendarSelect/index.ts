@@ -27,7 +27,6 @@ templateCell_$PLUGIN_ID.innerHTML = `
 
 var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
-<link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/bold/style.css" />
 <style>
 #calendar-container {
     font-family: 'Inter', sans-serif;
