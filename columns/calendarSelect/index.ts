@@ -20,8 +20,12 @@ const daysInMonth = (month: number, year: number) => new Date(year, month + 1, 0
 
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
 input {
+    font-family: var(--ob-font-family), sans-serif;
     height: 100%;
     flex: 1;
     background-color: transparent;
