@@ -70,9 +70,6 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     <textarea
         id="jsonEditor"
     ></textarea>
-    <div>
-        <button id="saveButton">Save</button>
-    </div>
 </div>
 `
 
@@ -203,20 +200,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
         jsonEditor.innerHTML = cellValue
 
-        const saveButton = this.shadow.getElementById('saveButton')
-        saveButton.onclick = () => {
-            this.callCustomEvent({
-                action: 'updatecell',
-                value: JSON.stringify(JSON.parse(jsonEditor.value), undefined, 2)
-            })
-
-            // Then stop editing the cell and close the editor view
-            this.callCustomEvent({
-                action: 'onstopedit',
-                value: true
-            })
-        }
-
         jsonEditor.addEventListener('blur', (ev) => {
             this.callCustomEvent({
                 action: 'updatecell',
@@ -228,6 +211,26 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
                 value: true
             })
         })
+
+        jsonEditor.addEventListener('keydown', (e) => {
+            if (e.code == "Enter" && e.shiftKey) {
+                return
+            }
+            if (e.code != "Enter") {
+                return
+            }
+
+
+            this.callCustomEvent({
+                action: 'updatecell',
+                value: JSON.stringify(JSON.parse(jsonEditor.innerHTML), undefined, 2)
+            })
+
+            this.callCustomEvent({
+                action: 'onstopedit',
+                value: true
+            })
+        } )
     }
     callCustomEvent(data) {
         const event = createCustomEvent(data)
