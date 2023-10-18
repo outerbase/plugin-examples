@@ -25,7 +25,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
 input {
-    font-family: var(--ob-font-family), sans-serif;
+    font-family: var(--ob-font-family);
     height: 100%;
     flex: 1;
     background-color: transparent;
@@ -46,7 +46,7 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--ob-font-family);
     width: 430px;
     height: 585px;
     color: var(--ob-text-color);

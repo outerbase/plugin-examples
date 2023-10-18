@@ -17,7 +17,8 @@ templateCell_$PLUGIN_ID.innerHTML = `
         height: 100%;
         width: calc(100% - 16px);
         padding: 0 8px;
-        font-family: var(--ob-font-family), sans-serif;
+        font-family: var(--ob-font-family);
+        color: var(--ob-text-color);
     }
     input {
         height: 100%;
