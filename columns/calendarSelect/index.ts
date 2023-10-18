@@ -92,7 +92,9 @@ li {
 }
 #days > li:hover {
     border-radius: 32px;
-    background: var(--neutral-50, #FAFAFA);
+    background: var(--ob-background-color);
+    color: var(--ob-text-color);
+    filter: invert(100%);
 }
 #close-editor {
     width: 24px;
@@ -104,8 +106,9 @@ li {
 }
 .active {
     border-radius: 32px;
-    background: var(--neutral-50, #FAFAFA);
-    color: black;
+    background: var(--ob-background-color);
+    color: var(--ob-text-color);
+    filter: invert(100%);
 }
 .navigation-arrows:hover {
     opacity: .5;
@@ -260,21 +263,28 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
             const cellValue = this.getAttribute('cellvalue')
             const cellAsDate = new Date(cellValue)
-            const isActive = day === cellAsDate.getDate()
+           
+            const currentDate = new Date(this.getAttribute('cellvalue'))
+            const selectedDate = new Date(year, month, day)
+
+            const isActive = day === cellAsDate.getDate() && currentDate.toDateString() === selectedDate.toDateString()
             const dayElement = dayElementMaker(day.toString(), true, dateFormat, this.shadow, isActive)
             daysElement.appendChild(dayElement)
         }
 
         const DAYS_IN_WEEK = 7
-        const daysAfter = DAYS_IN_WEEK - (totalDays + (daysTillFirstOfMonth - 1)) % DAYS_IN_WEEK
-        for (let monthAfterDay = 1; monthAfterDay <= daysAfter; monthAfterDay++) {
-            const monthFormatted = (month + 2).toString().padStart(2, '0')
-            const dayFormatted = monthAfterDay.toString().padStart(2, '0')
-            const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
-            daysElement.appendChild(dayElement)
-        }
 
+        const daysUnder = daysTillFirstOfMonth - 1 < 0 ? 0 : daysTillFirstOfMonth - 1
+        const daysAfter = DAYS_IN_WEEK - (totalDays + (daysUnder)) % DAYS_IN_WEEK
+        if (daysAfter != 7) {
+            for (let monthAfterDay = 1; monthAfterDay <= daysAfter; monthAfterDay++) {
+                const monthFormatted = (month + 2).toString().padStart(2, '0')
+                const dayFormatted = monthAfterDay.toString().padStart(2, '0')
+                const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
+                const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
+                daysElement.appendChild(dayElement)
+            }
+        }
     }
 
 }
@@ -350,5 +360,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define('outerbase-plugin-cell-$PLUGIN_ID', OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-editor-$PLUGIN_ID', OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-cell', OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-editor', OuterbasePluginEditor_$PLUGIN_ID)
