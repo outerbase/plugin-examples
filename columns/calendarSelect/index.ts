@@ -300,7 +300,7 @@ const addBackButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor
     }
 
 }
-const addForwardButtonFunctinoality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
+const addForwardButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const advanceDateElement = outerbasePluginEditor.shadow.getElementById('forward')
     advanceDateElement.onclick = () => {
         const monthElement = outerbasePluginEditor.shadow.getElementById('month')
@@ -330,7 +330,7 @@ const addCloseButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEdito
 
 const FUNCTIONALITIES = [
     addBackButtonFunctionality,
-    addForwardButtonFunctinoality,
+    addForwardButtonFunctionality,
     addCloseButtonFunctionality
 ]
 
