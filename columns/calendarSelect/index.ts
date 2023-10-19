@@ -187,7 +187,6 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     }
 
     shadow: ShadowRoot
-    DAYS_IN_WEEK = 7
 
     constructor() {
         super()
