@@ -248,13 +248,14 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         const lastDateOfMonth = new Date(year, month+1, 0).getDate();
         const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
         const lastDayOfPreviousMonth = new Date(year, month, 0).getDate();
-        console.log(firstDayOfMonth)
+
         for (let day = firstDayOfMonth; day > 0; day--) {
             const monthFormatted = (month).toString().padStart(2, '0')
-            const dayFormatted = day.toString().padStart(2, '0')
+            const fixedDay = lastDayOfPreviousMonth - day + 1
+            const dayFormatted = fixedDay.toString().padStart(2, '0')
 
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker((lastDayOfPreviousMonth - day + 1).toString(), false, dateFormat, this.shadow, false)
+            const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
@@ -264,7 +265,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
                 month: selectedMonth,
                 year: selectedYear
             } = getDateFromCell(this.getAttribute('cellvalue'))
-            
+
             const isToday = day === selectedDay
                 && month === selectedMonth
                 && year === selectedYear
@@ -276,12 +277,14 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isToday)
             daysElement.appendChild(dayElement)
         }
-        
-        for (let monthAfterDay = 1; monthAfterDay <= 5; monthAfterDay++) {
+
+        for (let monthAfterDay = lastDayOfMonth; monthAfterDay < 6; monthAfterDay++) {
             const monthFormatted = (month + 2).toString().padStart(2, '0')
-            const dayFormatted = monthAfterDay.toString().padStart(2, '0')
+            const fixedDay = monthAfterDay - lastDayOfMonth + 1
+            const dayFormatted = fixedDay.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
+
+            const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
     }
@@ -317,7 +320,6 @@ const addBackButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor
             monthElement.innerHTML = MONTHS[MONTHS.length - 1]
             const year = parseInt(yearElement.innerHTML) - 1
             yearElement.innerHTML = year.toString()
-            return
         } else {
             monthElement.innerHTML = MONTHS[monthIndex - 1]
         }
