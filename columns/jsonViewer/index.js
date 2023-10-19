@@ -3,6 +3,9 @@ const privileges = [
     'configuration',
 ]
 
+const STOP_EDITING_AND_CLOSE_EDITOR = "onstopedit"
+const UPDATE_CELL = "updatecell"
+
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +37,13 @@ templateCell_$PLUGIN_ID.innerHTML = `
         outline: none;
     }
     #view-image {
+        color: var(--ob-text-color);
+        text-align: center;
+        font-family: var(--ob-font-family);
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 1.2px;
         background-color: var(--ob-background-color)
     }
 </style>
@@ -116,20 +126,19 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
 
         jsonValue.addEventListener("focus", () => {
             this.callCustomEvent({
-                action: 'onstopedit',
+                action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
         });
 
         jsonValue.addEventListener("blur", () => {
             this.callCustomEvent({
-                action: 'updatecell',
+                action: UPDATE_CELL,
                 value: JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
             })
 
-            // Then stop editing the cell and close the editor view
             this.callCustomEvent({
-                action: 'onstopedit',
+                action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
         });
@@ -144,12 +153,12 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
 
 
             this.callCustomEvent({
-                action: 'updatecell',
+                action: UPDATE_CELL,
                 value: JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
             })
 
             this.callCustomEvent({
-                action: 'onstopedit',
+                action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
             jsonValue.blur()
@@ -203,12 +212,12 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
         jsonEditor.addEventListener('blur', (ev) => {
             this.callCustomEvent({
-                action: 'updatecell',
+                action: UPDATE_CELL,
                 value: JSON.stringify(JSON.parse(jsonEditor.value), undefined, 2)
             })
 
             this.callCustomEvent({
-                action: 'onstopedit',
+                action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
         })
@@ -223,12 +232,12 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
 
             this.callCustomEvent({
-                action: 'updatecell',
+                action: UPDATE_CELL,
                 value: JSON.stringify(JSON.parse(jsonEditor.innerHTML), undefined, 2)
             })
 
             this.callCustomEvent({
-                action: 'onstopedit',
+                action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
         } )

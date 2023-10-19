@@ -1,6 +1,9 @@
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
 
+const STOP_EDITING_AND_CLOSE_EDITOR = "onstopedit"
+const UPDATE_CELL = "updatecell"
+
 type SendToOuterbaseParams = {
     outerbaseElement: HTMLElement
     outerbaseEvent: Event
@@ -312,10 +315,10 @@ const dayElementMaker = (display: string, focus: boolean, value: any, shadow: Sh
     dayElement.style.cursor = 'pointer'
     dayElement.className = isActive ? "active" : ""
     dayElement.onclick = (event) => {
-        const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
+        const updateCellEvent = createOuterbaseEvent({ action: UPDATE_CELL, value })
         sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: updateCellEvent })
 
-        const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
+        const stopEditingEvent = createOuterbaseEvent({ action: STOP_EDITING_AND_CLOSE_EDITOR, value: true })
         sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: stopEditingEvent })
     }
     return dayElement
@@ -364,7 +367,7 @@ const addForwardButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEdi
 const addCloseButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const closeEditorElement = outerbasePluginEditor.shadow.getElementById('close-editor')
     closeEditorElement.onclick = () => {
-        const ev = createOuterbaseEvent({ action: 'onstopedit', value: true })
+        const ev = createOuterbaseEvent({ action: STOP_EDITING_AND_CLOSE_EDITOR, value: true })
         sendToOuterbase({ outerbaseElement: closeEditorElement, outerbaseEvent: ev })
     }
 }
@@ -375,5 +378,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
