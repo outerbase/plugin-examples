@@ -174,7 +174,7 @@ const getDateFromCell = (cell: string) => {
     // Month is 0 indexed. Day is 1 indexed so no need to alter.
     return {
         day: splitCell[2],
-        month: splitCell[1]-1,
+        month: splitCell[1] - 1,
         year: splitCell[0]
     }
 }
@@ -246,7 +246,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         daysElement.innerHTML = ""
 
         const firstDayOfMonth = new Date(year, month, 1).getDay();
-        const lastDateOfMonth = new Date(year, month+1, 0).getDate();
+        const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
         const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
         const lastDayOfPreviousMonth = new Date(year, month, 0).getDate();
 
@@ -257,7 +257,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
                 monthHandleRollover = 12
                 yearHandleRollover -= 1
             }
-            
+
 
             const monthFormatted = (monthHandleRollover).toString().padStart(2, '0')
             const fixedDay = lastDayOfPreviousMonth - day + 1
