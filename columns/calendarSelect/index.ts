@@ -360,8 +360,6 @@ const FUNCTIONALITIES = [
     addForwardButtonFunctionality,
     addCloseButtonFunctionality
 ]
-const isLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1"
-const pluginCellName = isLocalhost ? "outerbase-plugin-cell-$PLUGIN_ID" : 'outerbase-plugin-cell'
-const pluginEditorName = isLocalhost ? "outerbase-plugin-editor" : "outerbase-plugin-editor-$PLUGIN_ID"
-window.customElements.define(pluginCellName, OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define(pluginEditorName, OuterbasePluginEditor_$PLUGIN_ID)
+
+window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
