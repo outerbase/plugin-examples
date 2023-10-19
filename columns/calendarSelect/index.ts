@@ -223,8 +223,8 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     }
     connectedCallback() {
         FUNCTIONALITIES.forEach(func => func(this))
-        const cellValue = this.getAttribute('cellvalue')
-        const cellAsDate = new Date(cellValue)
+        const {year, month, day} = getDateFromCell(this.getAttribute('cellvalue'))
+        const cellAsDate = new Date(year, month, day)
 
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = cellAsDate.getFullYear().toString()
@@ -246,7 +246,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         // Handle filling in the calendar
         const daysElement = this.shadow.getElementById('days')
         daysElement.innerHTML = ""
-
+        console.log('Looking at', year, month)
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
         const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
@@ -377,5 +377,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
