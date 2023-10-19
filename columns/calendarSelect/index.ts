@@ -243,8 +243,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         // Handle filling in the calendar
         const daysElement = this.shadow.getElementById('days')
         daysElement.innerHTML = ""
-        const totalDays = daysInMonth(month, year)
-        console.log('The month is', month)
+
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const lastDateOfMonth = new Date(year, month+1, 0).getDate();
         const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
@@ -259,18 +258,22 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             daysElement.appendChild(dayElement)
         }
 
-        for (let day = 1; day <= totalDays; day++) {
+        for (let day = 1; day <= lastDateOfMonth; day++) {
+            const {
+                day: selectedDay,
+                month: selectedMonth,
+                year: selectedYear
+            } = getDateFromCell(this.getAttribute('cellvalue'))
+            
+            const isToday = day === selectedDay
+                && month === selectedMonth
+                && year === selectedYear
 
             const monthFormatted = (month + 1).toString().padStart(2, '0')
             const dayFormatted = day.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
 
-            const {day: sDay, month: sMonth, year: sYear} = getDateFromCell(this.getAttribute('cellvalue'))
-            const currentDate = new Date(sYear, sMonth, sDay)
-            const selectedDate = new Date(year, month, day)
-
-            const isActive = day === currentDate.getDate() && currentDate.toDateString() === selectedDate.toDateString()
-            const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isActive)
+            const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isToday)
             daysElement.appendChild(dayElement)
         }
         
