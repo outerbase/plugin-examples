@@ -171,9 +171,10 @@ li {
 const getDateFromCell = (cell: string) => {
     const splitCell = cell.split('-').map(value => parseInt(value))
 
+    // Month is 0 indexed. Day is 1 indexed so no need to alter.
     return {
         day: splitCell[2],
-        month: splitCell[1],
+        month: splitCell[1]-1,
         year: splitCell[0]
     }
 }
@@ -250,11 +251,19 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         const lastDayOfPreviousMonth = new Date(year, month, 0).getDate();
 
         for (let day = firstDayOfMonth; day > 0; day--) {
-            const monthFormatted = (month).toString().padStart(2, '0')
+            let monthHandleRollover = month
+            let yearHandleRollover = year
+            if (month === 0) {
+                monthHandleRollover = 12
+                yearHandleRollover -= 1
+            }
+            
+
+            const monthFormatted = (monthHandleRollover).toString().padStart(2, '0')
             const fixedDay = lastDayOfPreviousMonth - day + 1
             const dayFormatted = fixedDay.toString().padStart(2, '0')
 
-            const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
+            const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
             const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
@@ -265,7 +274,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
                 month: selectedMonth,
                 year: selectedYear
             } = getDateFromCell(this.getAttribute('cellvalue'))
-
             const isToday = day === selectedDay
                 && month === selectedMonth
                 && year === selectedYear
@@ -279,10 +287,16 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         }
 
         for (let monthAfterDay = lastDayOfMonth; monthAfterDay < 6; monthAfterDay++) {
-            const monthFormatted = (month + 2).toString().padStart(2, '0')
+            let monthHandleRollover = month + 2
+            let yearHandleRollover = year
+            if (monthHandleRollover === 13) {
+                monthHandleRollover = 1
+                yearHandleRollover += 1
+            }
+            const monthFormatted = (monthHandleRollover).toString().padStart(2, '0')
             const fixedDay = monthAfterDay - lastDayOfMonth + 1
             const dayFormatted = fixedDay.toString().padStart(2, '0')
-            const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
+            const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
 
             const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
@@ -361,5 +375,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
