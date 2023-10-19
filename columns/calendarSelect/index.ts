@@ -234,7 +234,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     render() {
         const year = parseInt(this.shadow.getElementById('year').innerHTML)
         const month = MONTHS.indexOf(this.shadow.getElementById('month').innerHTML)
-        
+
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = year.toString()
         const monthElement = this.shadow.getElementById('month')
@@ -244,26 +244,18 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         const daysElement = this.shadow.getElementById('days')
         daysElement.innerHTML = ""
         const totalDays = daysInMonth(month, year)
+        console.log('The month is', month)
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const lastDateOfMonth = new Date(year, month+1, 0).getDate();
+        const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
+        const lastDayOfPreviousMonth = new Date(year, month, 0).getDate();
+        console.log(firstDayOfMonth)
+        for (let day = firstDayOfMonth; day > 0; day--) {
+            const monthFormatted = (month).toString().padStart(2, '0')
+            const dayFormatted = day.toString().padStart(2, '0')
 
-        const daysTillFirstOfMonth = new Date(year, month, 1).getDay()
-        let previousYear: number
-        let previousMonth: number
-        if (month - 1 < 0) {
-            previousYear = year - 1
-            previousMonth = 12
-        } else {
-            previousYear = year
-            previousMonth = month - 1
-        }
-
-        const daysOfPreviousMonth = daysInMonth(previousMonth, previousYear)
-        for (let fillDay = 1; fillDay < daysTillFirstOfMonth; fillDay++) {
-            const displayDay = daysOfPreviousMonth - daysTillFirstOfMonth + fillDay
-            const monthFormatted = (previousMonth + 1).toString().padStart(2, '0')
-            const dayFormatted = displayDay.toString().padStart(2, '0')
-
-            const dateFormat = `${previousYear}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(displayDay.toString(), false, dateFormat, this.shadow, false)
+            const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
+            const dayElement = dayElementMaker((lastDayOfPreviousMonth - day + 1).toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
@@ -281,19 +273,13 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isActive)
             daysElement.appendChild(dayElement)
         }
-
-        const DAYS_IN_WEEK = 7
-
-        const daysUnder = daysTillFirstOfMonth - 1 < 0 ? 0 : daysTillFirstOfMonth - 1
-        const daysAfter = DAYS_IN_WEEK - (totalDays + (daysUnder)) % DAYS_IN_WEEK
-        if (daysAfter != 7) {
-            for (let monthAfterDay = 1; monthAfterDay <= daysAfter; monthAfterDay++) {
-                const monthFormatted = (month + 2).toString().padStart(2, '0')
-                const dayFormatted = monthAfterDay.toString().padStart(2, '0')
-                const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-                const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
-                daysElement.appendChild(dayElement)
-            }
+        
+        for (let monthAfterDay = 1; monthAfterDay <= 5; monthAfterDay++) {
+            const monthFormatted = (month + 2).toString().padStart(2, '0')
+            const dayFormatted = monthAfterDay.toString().padStart(2, '0')
+            const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
+            const dayElement = dayElementMaker(monthAfterDay.toString(), false, dateFormat, this.shadow, false)
+            daysElement.appendChild(dayElement)
         }
     }
 
