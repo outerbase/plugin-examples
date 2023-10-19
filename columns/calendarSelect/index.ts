@@ -25,7 +25,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
 input {
-    font-family: var(--ob-font-family);
+    font-family: 'input-mono', monospace;
     height: 100%;
     flex: 1;
     background-color: transparent;
@@ -46,7 +46,7 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
-    font-family: var(--ob-font-family);
+    font-family: 'input-mono', monospace;
     width: 430px;
     height: 585px;
     color: var(--ob-text-color);
@@ -155,19 +155,28 @@ li {
     </div>
     <div id="bottom-calendar">
        <ul class="day-names">
-            <li class="ob-secondary-button">Mo</li>
+            <li>Su</li>
+            <li>Mo</li>
             <li>Tu</li>
             <li>We</li>
             <li>Th</li>
             <li>Fr</li>
             <li>Sa</li>
-            <li>Su</li>
         </ul>
         <ol id="days">
         </ol>
     </div>
 </div>
 `
+const getDateFromCell = (cell: string) => {
+    const splitCell = cell.split('-').map(value => parseInt(value))
+
+    return {
+        day: splitCell[2],
+        month: splitCell[1],
+        year: splitCell[0]
+    }
+}
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes(): Array<string> {
         return ['cellValue']
@@ -186,7 +195,8 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         const cellValue = this.getAttribute('cellvalue')
         const cell = this.shadow.getElementById('dateDisplay') as HTMLInputElement
-        cell.value = cellValue
+        const validDate = new Date(cellValue) ? cellValue : new Date().toISOString().split('T')[0]
+        cell.value = validDate
 
 
         cell.addEventListener("focus", () => {
@@ -224,6 +234,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     render() {
         const year = parseInt(this.shadow.getElementById('year').innerHTML)
         const month = MONTHS.indexOf(this.shadow.getElementById('month').innerHTML)
+        
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = year.toString()
         const monthElement = this.shadow.getElementById('month')
@@ -261,14 +272,13 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const monthFormatted = (month + 1).toString().padStart(2, '0')
             const dayFormatted = day.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-            const cellValue = this.getAttribute('cellvalue')
-            const cellAsDate = new Date(cellValue)
-           
-            const currentDate = new Date(this.getAttribute('cellvalue'))
+
+            const {day: sDay, month: sMonth, year: sYear} = getDateFromCell(this.getAttribute('cellvalue'))
+            const currentDate = new Date(sYear, sMonth, sDay)
             const selectedDate = new Date(year, month, day)
 
-            const isActive = day === cellAsDate.getDate() && currentDate.toDateString() === selectedDate.toDateString()
-            const dayElement = dayElementMaker(day.toString(), true, dateFormat, this.shadow, isActive)
+            const isActive = day === currentDate.getDate() && currentDate.toDateString() === selectedDate.toDateString()
+            const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isActive)
             daysElement.appendChild(dayElement)
         }
 
