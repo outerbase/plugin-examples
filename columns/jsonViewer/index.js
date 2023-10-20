@@ -1,8 +1,18 @@
 const privileges = [
-
     'cellvalue',
 ]
+const decodeAttributeByName = (fromClass, name) => {
+    const encodedJSON = fromClass.getAttribute(name);
+    const decodedJSON = encodedJSON
+        ?.replace(/&quot;/g, '"')
+        ?.replace(/&#39;/g, "'");
 
+    try {
+        return JSON.stringify(JSON.parse(decodedJSON))
+    } catch (e) {
+        return JSON.stringify({})
+    }
+}
 const STOP_EDITING_AND_CLOSE_EDITOR = "onstopedit"
 const UPDATE_CELL = "updatecell"
 
@@ -63,19 +73,7 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     #container {
         max-width: 400px;
     }
-    #image-old {
-        width: 100%;
-        height: 100%;
-    }
-    #image {
-        background-size: contain;
-        background-repeat: no-repeat;
-        max-width: 400px;
-    }
-    #background-image {
-        background-repeat: no-repeat;
-        background-size: contain;
-    }
+
     #jsonEditor {
         width: 250px;
         height: 250px;
@@ -84,7 +82,7 @@ templateEditor_$PLUGIN_ID.innerHTML = `
         outline: none;
     }
 </style>
-<div class="bg-transparent backdrop-blur-md pt-3 pr-3 pb-2 pl-3 rounded">
+<div>
     <textarea
         id="jsonEditor"
     ></textarea>
@@ -123,12 +121,9 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(
             JSON.parse(this.getAttribute('configuration'))
         )
+        console.log('The cell value', this.getAttribute('cellvalue'))
         let cellValue;
-        try {
-            cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
-        } catch (e) {
-            cellValue = JSON.stringify({})
-        }
+        cellValue = decodeAttributeByName(this, 'cellvalue')
         const cell = this.shadow.getElementById('jsonValue')
         cell.value = cellValue
 
@@ -226,17 +221,10 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     // logic that you want to run when the element is first stood up here, such as
     // event listeners, default values to display, etc.
     connectedCallback() {
+
         let cellValue
-        try {
-            if (this.getAttribute('cellvalue') === "null") {
-                cellValue = JSON.stringify({})
-            } else {
-                cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
-            }
-        } catch (e) {
-            cellValue = JSON.stringify({})
-            console.log('Null', JSON.stringify({}))
-        }
+        cellValue = decodeAttributeByName(this, 'cellvalue')
+
         const jsonEditor = this.shadow.getElementById("jsonEditor");
         console.log('Json editor value', cellValue)
         jsonEditor.innerHTML = cellValue
@@ -298,6 +286,7 @@ const createCustomEvent = (data) => new CustomEvent('custom-change', {
     bubbles: true,  // If you want the event to bubble up through the DOM
     composed: true  // Allows the event to pass through shadow DOM boundaries
 });
+
 
 // DO NOT change the name of this variable or the classes defined in this file.
 // Changing the name of this variable will cause your plugin to not work properly
