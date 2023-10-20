@@ -54,7 +54,7 @@ templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
     font-family: 'input-mono', monospace;
-    width: 430px;
+    width: 420px;
     height: 585px;
     color: var(--ob-text-color);
     border-radius: 20px;

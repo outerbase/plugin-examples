@@ -36,7 +36,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
     input:focus {
         outline: none;
     }
-    #view-image {
+    #view-json {
         color: var(--ob-text-color);
         text-align: center;
         font-family: var(--ob-font-family);
@@ -47,12 +47,13 @@ templateCell_$PLUGIN_ID.innerHTML = `
         background-color: var(--ob-background-color);
         border-radius: 5px;
         filter: invert(100%);
+        border: 0px;
         padding: 5px;
     }
 </style>
 <div id="container">
     <input type="text" id="jsonValue" placeholder="Enter JSON...">
-    <button id="view-image">{;}</button>
+    <button id="view-json">{;}</button>
 </div>
 `
 
@@ -132,7 +133,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         cell.value = cellValue
 
         var jsonValue = this.shadow.getElementById("jsonValue");
-        var viewImageButton = this.shadow.getElementById("view-image");
+        var viewImageButton = this.shadow.getElementById("view-json");
 
         jsonValue.addEventListener("focus", () => {
             this.callCustomEvent({
