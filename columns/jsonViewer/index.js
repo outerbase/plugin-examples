@@ -1,6 +1,6 @@
 const privileges = [
-    'cellValue',
-    'configuration',
+
+    'cellvalue',
 ]
 
 const STOP_EDITING_AND_CLOSE_EDITOR = "onstopedit"
@@ -44,7 +44,10 @@ templateCell_$PLUGIN_ID.innerHTML = `
         font-style: normal;
         font-weight: 400;
         letter-spacing: 1.2px;
-        background-color: var(--ob-background-color)
+        background-color: var(--ob-background-color);
+        border-radius: 5px;
+        filter: invert(100%);
+        padding: 5px;
     }
 </style>
 <div id="container">
@@ -75,6 +78,9 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     #jsonEditor {
         width: 250px;
         height: 250px;
+    }
+    input:focus {
+        outline: none;
     }
 </style>
 <div class="bg-transparent backdrop-blur-md pt-3 pr-3 pb-2 pl-3 rounded">
@@ -116,8 +122,12 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(
             JSON.parse(this.getAttribute('configuration'))
         )
-
-        const cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
+        let cellValue;
+        try {
+            cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
+        } catch (e) {
+            cellValue = JSON.stringify({})
+        }
         const cell = this.shadow.getElementById('jsonValue')
         cell.value = cellValue
 
@@ -132,9 +142,15 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
         });
 
         jsonValue.addEventListener("blur", () => {
+            let jsonCellValue;
+            try {
+                jsonCellValue = JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
+            } catch (e) {
+                jsonCellValue = JSON.stringify({})
+            }
             this.callCustomEvent({
                 action: UPDATE_CELL,
-                value: JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
+                value: jsonCellValue
             })
 
             this.callCustomEvent({
@@ -150,11 +166,15 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
             if (e.code != "Enter") {
                 return
             }
-
-
+            let jsonCellValue;
+            try {
+                jsonCellValue = JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
+            } catch (e) {
+                jsonCellValue = JSON.stringify({})
+            }
             this.callCustomEvent({
                 action: UPDATE_CELL,
-                value: JSON.stringify(JSON.parse(jsonValue.value), undefined, 2)
+                value: jsonCellValue
             })
 
             this.callCustomEvent({
@@ -163,13 +183,13 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
             })
             jsonValue.blur()
         });
-
-            viewImageButton.addEventListener("click", () => {
-                this.callCustomEvent({
-                    action: 'onedit',
-                    value: true
-                })
-            });
+        viewImageButton.addEventListener("click", () => {
+            console.log('Calling onedit')
+            this.callCustomEvent({
+                action: 'onedit',
+                value: true
+            })
+        });
 
     }
 
@@ -205,15 +225,33 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     // logic that you want to run when the element is first stood up here, such as
     // event listeners, default values to display, etc.
     connectedCallback() {
-        const cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
+        let cellValue
+        try {
+            if (this.getAttribute('cellvalue') === "null") {
+                cellValue = JSON.stringify({})
+            } else {
+                cellValue = JSON.stringify(JSON.parse(this.getAttribute('cellvalue')), undefined, 2)
+            }
+        } catch (e) {
+            cellValue = JSON.stringify({})
+            console.log('Null', JSON.stringify({}))
+        }
         const jsonEditor = this.shadow.getElementById("jsonEditor");
-
+        console.log('Json editor value', cellValue)
         jsonEditor.innerHTML = cellValue
 
         jsonEditor.addEventListener('blur', (ev) => {
+            let cellEditorValue
+            try {
+                cellEditorValue = JSON.stringify(JSON.parse(jsonEditor.value), undefined, 2)
+            } catch (e) {
+                cellEditorValue = JSON.stringify({})
+            }
+            console.log('Json editor update', cellEditorValue)
+
             this.callCustomEvent({
                 action: UPDATE_CELL,
-                value: JSON.stringify(JSON.parse(jsonEditor.value), undefined, 2)
+                value: cellEditorValue
             })
 
             this.callCustomEvent({
@@ -229,18 +267,24 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             if (e.code != "Enter") {
                 return
             }
+            let cellEditorValue
+            try {
+                cellEditorValue = JSON.stringify(JSON.parse(jsonEditor.value), undefined, 2)
+            } catch (e) {
+                cellEditorValue = JSON.stringify({})
+            }
 
 
             this.callCustomEvent({
                 action: UPDATE_CELL,
-                value: JSON.stringify(JSON.parse(jsonEditor.innerHTML), undefined, 2)
+                value: cellEditorValue
             })
 
             this.callCustomEvent({
                 action: STOP_EDITING_AND_CLOSE_EDITOR,
                 value: true
             })
-        } )
+        })
     }
     callCustomEvent(data) {
         const event = createCustomEvent(data)

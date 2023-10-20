@@ -1,9 +1,6 @@
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
 
-const STOP_EDITING_AND_CLOSE_EDITOR = "onstopedit"
-const UPDATE_CELL = "updatecell"
-
 type SendToOuterbaseParams = {
     outerbaseElement: HTMLElement
     outerbaseEvent: Event
@@ -16,6 +13,7 @@ const createOuterbaseEvent = (data: any) => new CustomEvent('custom-change', {
 })
 
 const sendToOuterbase = ({ outerbaseElement, outerbaseEvent }: SendToOuterbaseParams) => {
+    console.log('Dispatching', outerbaseEvent)
     outerbaseElement.dispatchEvent(outerbaseEvent)
 }
 
@@ -28,15 +26,21 @@ templateCell_$PLUGIN_ID.innerHTML = `
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
 input {
-    font-family: 'input-mono', monospace;
-    height: 100%;
-    flex: 1;
     background-color: transparent;
     border: 0;
-    min-width: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+    font-family: 'input-mono', monospace;
+    line-height: 36px;
+    font-size: 12px;
+    font-family: 'input-mono', monospace;
+    font-weight: 400;
+    font-style: normal;
+
+}
+input:focus {
+    outline: none;
 }
 
 </style>
@@ -136,7 +140,7 @@ li {
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <div id="calendar-container">
     <div id="top-calendar">
-        <div id="column-name">Column_Name</div>
+        <div id="column-name"></div>
         <div id="close-editor">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="m8.464 15.535l7.072-7.07m-7.072 0l7.072 7.07"/></svg>
         </div>
@@ -198,9 +202,8 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         const cellValue = this.getAttribute('cellvalue')
         const cell = this.shadow.getElementById('dateDisplay') as HTMLInputElement
-        const validDate = new Date(cellValue) ? cellValue : new Date().toISOString().split('T')[0]
+        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : ""
         cell.value = validDate
-
 
         cell.addEventListener("focus", () => {
             const ev = createOuterbaseEvent({ action: 'onedit', value: true })
@@ -223,7 +226,10 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     }
     connectedCallback() {
         FUNCTIONALITIES.forEach(func => func(this))
-        const {year, month, day} = getDateFromCell(this.getAttribute('cellvalue'))
+        const cellValue = this.getAttribute('cellvalue')
+        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : new Date().toISOString().split('T')[0]
+        
+        const {year, month, day} = getDateFromCell(validDate)
         const cellAsDate = new Date(year, month, day)
 
         const yearElement = this.shadow.getElementById('year')
@@ -237,6 +243,8 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     render() {
         const year = parseInt(this.shadow.getElementById('year').innerHTML)
         const month = MONTHS.indexOf(this.shadow.getElementById('month').innerHTML)
+        const cellValue = this.getAttribute('cellvalue')
+        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : new Date().toISOString().split('T')[0]
 
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = year.toString()
@@ -246,7 +254,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         // Handle filling in the calendar
         const daysElement = this.shadow.getElementById('days')
         daysElement.innerHTML = ""
-        console.log('Looking at', year, month)
         const firstDayOfMonth = new Date(year, month, 1).getDay();
         const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
         const lastDayOfMonth = new Date(year, month, lastDateOfMonth).getDay();
@@ -275,7 +282,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
                 day: selectedDay,
                 month: selectedMonth,
                 year: selectedYear
-            } = getDateFromCell(this.getAttribute('cellvalue'))
+            } = getDateFromCell(validDate)
             const isToday = day === selectedDay
                 && month === selectedMonth
                 && year === selectedYear
@@ -314,10 +321,10 @@ const dayElementMaker = (display: string, focus: boolean, value: any, shadow: Sh
     dayElement.style.cursor = 'pointer'
     dayElement.className = isActive ? "active" : ""
     dayElement.onclick = (event) => {
-        const updateCellEvent = createOuterbaseEvent({ action: UPDATE_CELL, value })
+        const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
         sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: updateCellEvent })
 
-        const stopEditingEvent = createOuterbaseEvent({ action: STOP_EDITING_AND_CLOSE_EDITOR, value: true })
+        const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
         sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: stopEditingEvent })
     }
     return dayElement
@@ -366,7 +373,7 @@ const addForwardButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEdi
 const addCloseButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const closeEditorElement = outerbasePluginEditor.shadow.getElementById('close-editor')
     closeEditorElement.onclick = () => {
-        const ev = createOuterbaseEvent({ action: STOP_EDITING_AND_CLOSE_EDITOR, value: true })
+        const ev = createOuterbaseEvent({ action: 'onstopedit', value: true })
         sendToOuterbase({ outerbaseElement: closeEditorElement, outerbaseEvent: ev })
     }
 }
@@ -377,5 +384,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
