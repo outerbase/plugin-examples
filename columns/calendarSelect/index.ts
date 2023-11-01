@@ -50,6 +50,7 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
+    margin-top: 4px 
     display: flex;
     font-family: var(--ob-font-family);
     width: 314px;
