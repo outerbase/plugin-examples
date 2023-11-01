@@ -21,9 +21,6 @@ const daysInMonth = (month: number, year: number) => new Date(year, month + 1, 0
 
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
 input {
     background-color: transparent;
@@ -31,10 +28,10 @@ input {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    font-family: 'input-mono', monospace;
+    font-family: var(--ob-font-family);
     line-height: 36px;
     font-size: 12px;
-    font-family: 'input-mono', monospace;
+    font-family: var(--ob-font-family);
     font-weight: 400;
     font-style: normal;
 
@@ -53,54 +50,69 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
-    font-family: 'input-mono', monospace;
+    display: flex;
+    font-family: var(--ob-font-family);
     width: 314px;
-    height: 272px;
     color: var(--ob-text-color);
     border-radius: 20px;
     border: 1px solid var(--ob-border-color);
-    background: var(--ob-background-color);
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);  
-}
-#top-calendar {
-    max-height: 24px;
-    display: flex;
-    justify-content: space-between;
+    background-color: var(--ob-background-color);
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    flex-direction: column;
     align-items: center;
-    border-bottom: 1px solid var(--neutral-800, #262626);
 }
 #mid-calendar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 46px;
+    height: 42px;
+    padding: 16px 24px 0px 24px;
+    font-weight: 600;
 }
 #mid-calendar > div {
     display: flex;
 }
 #bottom-calendar {
-    height: 336px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 280px;
+    padding: 12px 0px;
 }
+
+svg {
+    fill: var(--ob-text-color);
+}
+
 ul, ol {
     display: grid;
-    grid-template-columns: repeat(7, 45px);
+    grid-template-columns: repeat(7, 40px);
     text-align: center;
     justify-items: center;
     padding: 0;
+    text-align: center;
+
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
 }
   
 li {
     display: flex;
-    padding: 8px;
     align-items: center;
     justify-content: center;
     list-style: none;
-    width: 16px;
-    height: 16px;
+    width: 40px;
+    height: 40px;
+}
+#days {
+    margin: 0px;
+    
 }
 #days > li:hover {
-    border-radius: 32px;
-    background: var(--ob-background-color);
+    border-radius: 14px;
+    background-color: var(--ob-background-color);
     color: var(--ob-text-color);
     filter: invert(100%);
 }
@@ -113,10 +125,18 @@ li {
     opacity: .5;
 }
 .active {
-    border-radius: 32px;
-    background: var(--ob-background-color);
+    border-radius: 14px;
     color: var(--ob-text-color);
+    border-radius: 14px;
+    background: var(--ob-background-color, #FAFAFA);
+    box-shadow: 0px 6px 16px 0px rgba(255, 255, 255, 0.25);
     filter: invert(100%);
+}
+.day-names {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
 }
 .navigation-arrows:hover {
     opacity: .5;
@@ -127,24 +147,21 @@ li {
     padding: 16px;
     cursor: pointer;
 }
+.day-names  {
+    margin: 0px;
+}
 #date-container {
-    width: 68px;
+    width: 174px;
     height: 100%;
     display: flex;
-    padding-left: 24px;
     align-items: center;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 21px;
 }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <div id="calendar-container">
-    <div id="top-calendar">
-        <div id="column-name"></div>
-        <div id="close-editor">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="m8.464 15.535l7.072-7.07m-7.072 0l7.072 7.07"/></svg>
-        </div>
-    </div>
     <div id="mid-calendar">
         <div id="date-container">
             <div id="month"></div>
@@ -153,10 +170,18 @@ li {
         </div>
         <div>
         <div id="back" class="navigation-arrows">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="M164.24 203.76a6 6 0 1 1-8.48 8.48l-80-80a6 6 0 0 1 0-8.48l80-80a6 6 0 0 1 8.48 8.48L88.49 128Z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+                <g id="Frame 10">
+                <path id="Vector 2 (Stroke)" fill-rule="evenodd" clip-rule="evenodd" d="M9.00163 0.71811C9.37537 0.32692 10 0.32692 10.3738 0.71811C10.7242 1.08485 10.7242 1.6623 10.3738 2.02904L5.62459 7L10.3738 11.971C10.7242 12.3377 10.7242 12.9152 10.3738 13.2819C10 13.6731 9.37537 13.6731 9.00163 13.2819L3 7L9.00163 0.71811Z" />
+                </g>
+            </svg>
         </div>
         <div id="forward" class="navigation-arrows">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><path fill="currentColor" d="m180.24 132.24l-80 80a6 6 0 0 1-8.48-8.48L167.51 128L91.76 52.24a6 6 0 0 1 8.48-8.48l80 80a6 6 0 0 1 0 8.48Z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">
+                <g id="Frame 10">
+                <path id="Vector 2 (Stroke)" fill-rule="evenodd" clip-rule="evenodd" d="M4.99837 0.71811C4.62463 0.32692 3.99996 0.32692 3.62622 0.71811C3.27584 1.08485 3.27584 1.6623 3.62622 2.02904L8.37541 7L3.62622 11.971C3.27584 12.3377 3.27584 12.9152 3.62622 13.2819C3.99996 13.6731 4.62463 13.6731 4.99837 13.2819L11 7L4.99837 0.71811Z" />
+                </g>
+            </svg>
         </div>
         </div>
     </div>
@@ -217,6 +242,21 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes(): Array<string> {
         return ['cellValue']
     }
+    dayElementMaker = (display: string, focus: boolean, value: any, shadow: ShadowRoot, isActive: boolean) => {
+        const dayElement = document.createElement('li')
+        dayElement.innerHTML = display
+        dayElement.style.opacity = focus ? '1' : '.5'
+        dayElement.style.cursor = 'pointer'
+        dayElement.className = isActive ? "active" : ""
+        dayElement.onclick = (event) => {
+            const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
+            sendToOuterbase({ outerbaseElement: this, outerbaseEvent: updateCellEvent })
+    
+            const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
+            sendToOuterbase({ outerbaseElement: this, outerbaseEvent: stopEditingEvent })
+        }
+        return dayElement
+    }
 
     constructor() {
         super()
@@ -273,7 +313,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayFormatted = fixedDay.toString().padStart(2, '0')
 
             const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
-            const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
+            const dayElement = this.dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
@@ -291,7 +331,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayFormatted = day.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
 
-            const dayElement = dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isToday)
+            const dayElement = this.dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isToday)
             daysElement.appendChild(dayElement)
         }
 
@@ -307,28 +347,14 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const dayFormatted = fixedDay.toString().padStart(2, '0')
             const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
 
-            const dayElement = dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
+            const dayElement = this.dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
     }
 
 }
 
-const dayElementMaker = (display: string, focus: boolean, value: any, shadow: ShadowRoot, isActive: boolean) => {
-    const dayElement = document.createElement('li')
-    dayElement.innerHTML = display
-    dayElement.style.opacity = focus ? '1' : '.5'
-    dayElement.style.cursor = 'pointer'
-    dayElement.className = isActive ? "active" : ""
-    dayElement.onclick = (event) => {
-        const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
-        sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: updateCellEvent })
 
-        const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
-        sendToOuterbase({ outerbaseElement: shadow.getElementById('close-editor'), outerbaseEvent: stopEditingEvent })
-    }
-    return dayElement
-}
 
 const addBackButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const retreatDateElement = outerbasePluginEditor.shadow.getElementById('back')
@@ -370,19 +396,11 @@ const addForwardButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEdi
     }
 
 }
-const addCloseButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
-    const closeEditorElement = outerbasePluginEditor.shadow.getElementById('close-editor')
-    closeEditorElement.onclick = () => {
-        const ev = createOuterbaseEvent({ action: 'onstopedit', value: true })
-        sendToOuterbase({ outerbaseElement: closeEditorElement, outerbaseEvent: ev })
-    }
-}
 
 const FUNCTIONALITIES = [
     addBackButtonFunctionality,
-    addForwardButtonFunctionality,
-    addCloseButtonFunctionality
+    addForwardButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
