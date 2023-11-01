@@ -54,8 +54,8 @@ templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
     font-family: 'input-mono', monospace;
-    width: 420px;
-    height: 585px;
+    width: 314px;
+    height: 272px;
     color: var(--ob-text-color);
     border-radius: 20px;
     border: 1px solid var(--ob-border-color);
@@ -63,11 +63,10 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);  
 }
 #top-calendar {
-    max-height: 72px;
+    max-height: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px;
     border-bottom: 1px solid var(--neutral-800, #262626);
 }
 #mid-calendar {
@@ -84,18 +83,20 @@ templateEditor_$PLUGIN_ID.innerHTML = `
 }
 ul, ol {
     display: grid;
-    grid-template-columns: repeat(7, 56px);
-    justify-content: space-between;
+    grid-template-columns: repeat(7, 45px);
+    text-align: center;
+    justify-items: center;
     padding: 0;
 }
   
 li {
     display: flex;
+    padding: 8px;
     align-items: center;
     justify-content: center;
     list-style: none;
-    width: 56px;
-    height: 56px;
+    width: 16px;
+    height: 16px;
 }
 #days > li:hover {
     border-radius: 32px;
@@ -130,7 +131,6 @@ li {
     width: 68px;
     height: 100%;
     display: flex;
-    justify-content: space-between;
     padding-left: 24px;
     align-items: center;
 }
@@ -384,5 +384,5 @@ const FUNCTIONALITIES = [
     addCloseButtonFunctionality
 ]
 
-window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define("outerbase-plugin-editor-$PLUGIN_ID", OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-cell", OuterbasePluginCell_$PLUGIN_ID)
+window.customElements.define("outerbase-plugin-editor", OuterbasePluginEditor_$PLUGIN_ID)
