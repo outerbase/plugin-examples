@@ -4,7 +4,8 @@
     "description": "",
     "main": "calendar-select.js",
     "scripts": {
-        "build": "webpack --watch"
+        "build": "webpack build",
+        "watch": "webpack --watch"
     },
     "author": "",
     "license": "ISC",
