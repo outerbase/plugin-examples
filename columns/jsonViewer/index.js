@@ -59,101 +59,143 @@ svg:hover {
 `;
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
-  static get observedAttributes() {
-    return ["cellvalue"];
-  }
-
-  config = new OuterbasePluginConfig_$PLUGIN_ID({});
-
-  constructor() {
-    super();
-
-    this.shadow = this.attachShadow({ mode: "open" });
-    this.shadow.appendChild(templateCell_$PLUGIN_ID.content.cloneNode(true));
-  }
-  decodeAttributeByName = (fromClass, name) => {
-    const encodedJSON = fromClass.getAttribute(name);
-    const decodedJSON = encodedJSON
-      ?.replace(/&quot;/g, '"')
-      ?.replace(/&#39;/g, "'");
-    console.log("This is it before all that goes on", decodedJSON);
-    try {
-      const decodedAttribute = JSON.stringify(JSON.parse(decodedJSON));
-      return decodedAttribute;
-    } catch (e) {
-      return decodedJSON;
+    static get observedAttributes() {
+      return [
+        'cellvalue'
+    ];
     }
-  };
-
-  // This function is called when the UI is made available into the DOM. Put any
-  // logic that you want to run when the element is first stood up here, such as
-  // event listeners, default values to display, etc.
-  connectedCallback() {
-    // Parse the configuration object from the `configuration` attribute
-    // and store it in the `config` property.
-    this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-      JSON.parse(this.getAttribute("configuration"))
-    );
-    const editJSONButton = this.shadow.getElementById("view-json");
-    const cell = this.shadow.getElementById("jsonValue");
-    const cellValue = this.decodeAttributeByName(this, "cellvalue");
-    console.log('Cell Value after decoded')
-    cell.value = cellValue;
-
-    cell.addEventListener("focus", () => {
-      this.callCustomEvent({
-        action: "onstopedit",
-        value: true,
-      });
-    })
-
-    cell.addEventListener("blur", () => {
-      this.callCustomEvent({
-        action: "updatecell",
-        value: cell.value,
-      });
-
-      this.callCustomEvent({
-        action: "onstopedit",
-        value: true,
-      });
-    });
-
-    cell.addEventListener("keydown", (e) => {
-      if (e.code == "Enter" && e.shiftKey) {
-        return;
+  
+    config = new OuterbasePluginConfig_$PLUGIN_ID({});
+  
+    constructor() {
+      super();
+  
+      this.shadow = this.attachShadow({ mode: "open" });
+      this.shadow.appendChild(templateCell_$PLUGIN_ID.content.cloneNode(true));
+    }
+    decodeAttributeByName = (fromClass, name) => {
+      const encodedJSON = fromClass.getAttribute(name);
+      const decodedJSON = encodedJSON
+        ?.replace(/&quot;/g, '"')
+        ?.replace(/&#39;/g, "'");
+  
+      try {
+        const decodedAttribute = JSON.stringify(JSON.parse(decodedJSON));
+        return decodedAttribute;
+      } catch (e) {
+        return decodedJSON;
       }
-      if (e.code != "Enter") {
-        return;
+    };
+  
+    // This function is called when the UI is made available into the DOM. Put any
+    // logic that you want to run when the element is first stood up here, such as
+    // event listeners, default values to display, etc.
+    connectedCallback() {
+      // Parse the configuration object from the `configuration` attribute
+      // and store it in the `config` property.
+      this.config = new OuterbasePluginConfig_$PLUGIN_ID(
+        JSON.parse(this.getAttribute("configuration"))
+      );
+      const cell = this.shadow.getElementById("jsonValue");
+      const cellValue = this.decodeAttributeByName(this, "cellvalue")
+  
+      try {
+        const parsedCellValue = JSON.parse(cellValue)
+        const prettyJSON  = JSON.stringify(
+          parsedCellValue,
+          undefined,
+          2
+        );
+        cell.value = prettyJSON;
+      } catch {
+        cell.value = cellValue;
       }
-
-      this.callCustomEvent({
-        action: "updatecell",
-        value: cell.value,
+  
+  
+      var jsonValue = this.shadow.getElementById("jsonValue");
+      var viewImageButton = this.shadow.getElementById("view-json");
+  
+      jsonValue.addEventListener("focus", () => {
+        this.callCustomEvent({
+          action: "onstopedit",
+          value: true,
+        });
       });
-
-      this.callCustomEvent({
-        action: "onstopedit",
-        value: true,
+  
+      jsonValue.addEventListener("blur", () => {
+        try {
+          const parsedCellValue = JSON.parse(jsonValue.value)
+          const prettyJSON  = JSON.stringify(
+            parsedCellValue,
+            undefined,
+            2
+          );
+          this.callCustomEvent({
+            action: "updatecell",
+            value: prettyJSON.replace(/\n/g, ""),
+          });
+          cell.value = prettyJSON;
+        } catch {
+          this.callCustomEvent({
+            action: "updatecell",
+            value: jsonValue.value.replace(/\n/g, ""),
+          });
+        }
+  
+        this.callCustomEvent({
+          action: "onstopedit",
+          value: true,
+        });
       });
-      cell.blur();
-    });
-
-    editJSONButton.addEventListener("click", () => {
-      this.callCustomEvent({
-        action: "onedit",
-        value: true,
+  
+      jsonValue.addEventListener("keydown", (e) => {
+        if (e.code == "Enter" && e.shiftKey) {
+          return;
+        }
+        if (e.code != "Enter") {
+          return;
+        }
+        try {
+          const parsedCellValue = JSON.parse(jsonValue.value)
+          const prettyJSON  = JSON.stringify(
+            parsedCellValue,
+            undefined,
+            2
+          );
+          this.callCustomEvent({
+            action: "updatecell",
+            value: prettyJSON.replace(/\n/g, ""),
+          });
+          cell.value = prettyJSON;
+        } catch {
+          this.callCustomEvent({
+            action: "updatecell",
+            value: jsonValue.value.replace(/\n/g, ""),
+          });
+        }
+  
+        this.callCustomEvent({
+          action: "onstopedit",
+          value: true,
+        });
+        jsonValue.blur();
+  
       });
-    });
+      viewImageButton.addEventListener("click", () => {
+        this.callCustomEvent({
+          action: "onedit",
+          value: true,
+        });
+      });
+    }
+  
+    callCustomEvent(data) {
+      const event = createCustomEvent_$PLUGIN_ID(data);
+      this.dispatchEvent(event);
+    }
   }
-
-  callCustomEvent(data) {
-    const event = createCustomEvent_$PLUGIN_ID(data);
-    this.dispatchEvent(event);
-  }
-}
-const CELL_RENDERER_NAME_$PLUGIN_ID = "outerbase-plugin-cell-$PLUGIN_ID";
-const CELL_EDITOR_NAME_$PLUGIN_ID = "outerbase-plugin-editor-$PLUGIN_ID";
+const CELL_RENDERER_NAME_$PLUGIN_ID = "outerbase-plugin-cell-$PLUGIN_ID"
+const CELL_EDITOR_NAME_$PLUGIN_ID = "outerbase-plugin-editor-$PLUGIN_ID"
 const templateEditor_$PLUGIN_ID = document.createElement("template");
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
@@ -174,13 +216,55 @@ templateEditor_$PLUGIN_ID.innerHTML = `
         outline: none;
     }
 
+    .json-container {
+        resize: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        outline: none;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+        height: 200px; /* You can set the height as you want */
+        font-family: var(--ob-cell-font-family);
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 21px; /* 150% */
+        border-radius: 6px;
+        overflow: auto;
+      }
+      .json-light-key {
+        color: green;
+      }
+      .json-light-value {
+        color: red;
+      }
+      .json-light-string {
+        color: blue;
+      }
+      .json-light-boolean {
+        color: purple;
+      }
+      
+      .json-dark-key {
+        color: #98E491
+      }
+      .json-dark-value {
+        color: #89BEFA;
+      }
+      .json-dark-string {
+        color: #89BEFA;
+      }
+      .json-dark-boolean {
+        color: #89BEFA;
+      }
+
 </style>
 <div id="container">
-    <textarea
-        id="jsonEditor"
-    ></textarea>
+    <div id="jsonOutput" class="json-container" contenteditable="true"></div>
 </div>
 `;
+
 
 class OuterbasePluginConfig_$PLUGIN_ID {
   constructor(object) {}
@@ -191,6 +275,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     return ["cellvalue"];
   }
 
+
   constructor() {
     super();
 
@@ -200,7 +285,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     this.shadow = this.attachShadow({ mode: "open" });
 
     this.shadow.appendChild(templateEditor_$PLUGIN_ID.content.cloneNode(true));
-    
+
     // Parse the configuration object from the `configuration` attribute
     // and store it in the `config` property.
     this.config = new OuterbasePluginConfig_$PLUGIN_ID(
@@ -214,7 +299,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       ?.replace(/&#39;/g, "'");
 
     try {
-      console.log("Im stringifying and parsing", decodedJSON);
       return JSON.stringify(JSON.parse(decodedJSON));
     } catch (e) {
       return JSON.stringify({});
@@ -225,25 +309,42 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
   // logic that you want to run when the element is first stood up here, such as
   // event listeners, default values to display, etc.
   connectedCallback() {
-    const cellValue = this.decodeAttributeByName(this, "cellvalue");
-    const jsonEditor = this.shadow.getElementById("jsonEditor");
-    try {
-      const parsedJSON = JSON.parse(cellValue);
-      jsonEditor.innerHTML = JSON.stringify(parsedJSON, undefined, 2);
-    } catch {
-      jsonEditor.innerHTML = cellValue;
+    let syntaxColor = 'dark'
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      syntaxColor = 'dark'
+    } else {
+      syntaxColor = 'light'
     }
+    const cellValue = this.decodeAttributeByName(this, "cellvalue");
+    const jsonEditor = this.shadow.getElementById("jsonOutput");
+    try {
+        const parsedJSON = JSON.parse(cellValue);
+        jsonEditor.innerHTML = this.syntaxHighlight(JSON.stringify(parsedJSON, undefined, 2), syntaxColor)
+      } catch {
+        jsonEditor.innerHTML = cellValue;
+      }
+
+    // this.shadow.getElementById('jsonOutput').innerHTML = this.syntaxHighlight(cellValue);
+
+    // const cellValue = this.decodeAttributeByName(this, "cellvalue");
+    // const jsonEditor = this.shadow.getElementById("jsonEditor");
+    // try {
+    //   const parsedJSON = JSON.parse(cellValue);
+    //   jsonEditor.innerHTML = JSON.stringify(parsedJSON, undefined, 2)
+    // } catch {
+    //   jsonEditor.innerHTML = cellValue;
+    // }
 
     jsonEditor.addEventListener("blur", (ev) => {
       try {
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.value,
+          value: jsonEditor.innerText.replace(/\n/g, ""),
         });
       } catch (e) {
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.value,
+          value: jsonEditor.innerText.replace(/\n/g, ""),
         });
       }
       this.callCustomEvent({
@@ -261,17 +362,18 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       }
       e.preventDefault();
 
-      if (JSON.parse(cellValue) === JSON.parse(jsonEditor.value)){
+      try {
         this.callCustomEvent({
           action: "updatecell",
-          value: cellValue,
+          value: jsonEditor.innerText.replace(/\n/g, ""),
+        });
+      } catch (e) {
+
+        this.callCustomEvent({
+          action: "updatecell",
+          value: jsonEditor.innerText.replace(/\n/g, ""),
         });
       }
-      console.log('Comparing', JSON.stringify(JSON.parse(cellValue)) === JSON.stringify(JSON.parse(jsonEditor.value)),)
-      this.callCustomEvent({
-        action: "updatecell",
-        value: jsonEditor.value,
-      });
 
       this.callCustomEvent({
         action: "onstopedit",
@@ -279,6 +381,27 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       });
     });
   }
+
+  syntaxHighlight(json, theme) {
+    if (typeof json != 'string') {
+      json = JSON.stringify(json, undefined, 2);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-fA-F\d]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g, function (match) {
+      var cls = `json-${theme}-value`;
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = `json-${theme}-key`;
+        } else {
+          cls = `json-${theme}-string`;
+        }
+      } else if (/true|false|null/.test(match)) {
+        cls = `json-${theme}-boolean`;
+      }
+      return '<span class="' + cls + '">' + match + '</span>';
+    });
+  }
+
   callCustomEvent(data) {
     const event = createCustomEvent_$PLUGIN_ID(data);
     this.dispatchEvent(event);
