@@ -309,12 +309,9 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
   // logic that you want to run when the element is first stood up here, such as
   // event listeners, default values to display, etc.
   connectedCallback() {
-    let syntaxColor = 'dark'
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      syntaxColor = 'dark'
-    } else {
-      syntaxColor = 'light'
-    }
+
+    const metadata = this.decodeAttributeByName(this, "metadata")
+    const syntaxColor = JSON.parse(metadata).theme;
     const cellValue = this.decodeAttributeByName(this, "cellvalue");
     const jsonEditor = this.shadow.getElementById("jsonOutput");
     try {
