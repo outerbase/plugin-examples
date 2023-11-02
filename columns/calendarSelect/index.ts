@@ -1,23 +1,23 @@
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+const MONTHS_$PLUGIN_ID = ["January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"];
 
-type SendToOuterbaseParams = {
+type SendToOuterbaseParams_$PLUGIN_ID = {
     outerbaseElement: HTMLElement
     outerbaseEvent: Event
 }
 
-const createOuterbaseEvent = (data: any) => new CustomEvent('custom-change', {
+const createOuterbaseEvent_$PLUGIN_ID = (data: any) => new CustomEvent('custom-change', {
     detail: data,
     bubbles: true,
     composed: true
 })
 
-const sendToOuterbase = ({ outerbaseElement, outerbaseEvent }: SendToOuterbaseParams) => {
+const sendToOuterbase_$PLUGIN_ID = ({ outerbaseElement, outerbaseEvent }: SendToOuterbaseParams_$PLUGIN_ID) => {
     console.log('Dispatching', outerbaseEvent)
     outerbaseElement.dispatchEvent(outerbaseEvent)
 }
 
-const daysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
+const daysInMonth_$PLUGIN_ID = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
 
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
@@ -237,12 +237,11 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         const cellValue = this.getAttribute('cellvalue')
         const cell = this.shadow.getElementById('dateDisplay') as HTMLInputElement
-        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : ""
-        cell.value = validDate
+        cell.value = cellValue
 
         cell.addEventListener("focus", () => {
-            const ev = createOuterbaseEvent({ action: 'onedit', value: true })
-            sendToOuterbase({ outerbaseElement: this, outerbaseEvent: ev })
+            const ev = createOuterbaseEvent_$PLUGIN_ID({ action: 'onedit', value: true })
+            sendToOuterbase_$PLUGIN_ID({ outerbaseElement: this, outerbaseEvent: ev })
         });
     }
 }
@@ -259,14 +258,17 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         dayElement.style.cursor = 'pointer'
         dayElement.className = isActive ? "active" : ""
         dayElement.onclick = (event) => {
-            const updateCellEvent = createOuterbaseEvent({ action: 'updatecell', value })
-            sendToOuterbase({ outerbaseElement: this, outerbaseEvent: updateCellEvent })
+            console.log('You clicked on', value)
+            const updateCellEvent = createOuterbaseEvent_$PLUGIN_ID({ action: 'updatecell', value })
+            sendToOuterbase_$PLUGIN_ID({ outerbaseElement: this, outerbaseEvent: updateCellEvent })
     
-            const stopEditingEvent = createOuterbaseEvent({ action: 'onstopedit', value: true })
-            sendToOuterbase({ outerbaseElement: this, outerbaseEvent: stopEditingEvent })
+            const stopEditingEvent = createOuterbaseEvent_$PLUGIN_ID({ action: 'onstopedit', value: true })
+            sendToOuterbase_$PLUGIN_ID({ outerbaseElement: this, outerbaseEvent: stopEditingEvent })
         }
         return dayElement
     }
+
+    timeZone: string
 
     constructor() {
         super()
@@ -275,31 +277,52 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         this.shadow.appendChild(templateEditor_$PLUGIN_ID.content.cloneNode(true))
     }
     connectedCallback() {
-        FUNCTIONALITIES.forEach(func => func(this))
+        FUNCTIONALITIES_$PLUGIN_ID.forEach(func => func(this))
         const cellValue = this.getAttribute('cellvalue')
-        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : new Date().toISOString().split('T')[0]
-        
+
+        const sanitizedInput = cellValue.split('"').join('')
+        let inputWithoutTime
+        if (sanitizedInput.includes('T')) {
+            const splitCellValue = sanitizedInput.split('T')
+            inputWithoutTime = splitCellValue[0]
+            this.timeZone = splitCellValue[1]
+        } else {
+            inputWithoutTime = sanitizedInput
+        }
+        const validDate = !isNaN(new Date(inputWithoutTime).getTime()) ? inputWithoutTime : new Date().toISOString().split('T')[0]
+
+        console.log(inputWithoutTime)
         const {year, month, day} = getDateFromCell(validDate)
+        console.log(year, month, day)
         const cellAsDate = new Date(year, month, day)
 
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = cellAsDate.getFullYear().toString()
 
         const monthElement = this.shadow.getElementById('month')
-        monthElement.innerHTML = MONTHS[cellAsDate.getMonth()]
+        monthElement.innerHTML = MONTHS_$PLUGIN_ID[cellAsDate.getMonth()]
 
         this.render()
     }
     render() {
         const year = parseInt(this.shadow.getElementById('year').innerHTML)
-        const month = MONTHS.indexOf(this.shadow.getElementById('month').innerHTML)
+        const month = MONTHS_$PLUGIN_ID.indexOf(this.shadow.getElementById('month').innerHTML)
         const cellValue = this.getAttribute('cellvalue')
-        const validDate = !isNaN(new Date(cellValue).getTime()) ? cellValue : new Date().toISOString().split('T')[0]
+        const sanitizedInput = cellValue.split('"').join('')
+        let inputWithoutTime
+        if (sanitizedInput.includes('T')) {
+            const splitCellValue = sanitizedInput.split('T')
+            inputWithoutTime = splitCellValue[0]
+            this.timeZone = splitCellValue[1]
+        } else {
+            inputWithoutTime = sanitizedInput
+        }
+        const validDate = !isNaN(new Date(inputWithoutTime).getTime()) ? inputWithoutTime : new Date().toISOString().split('T')[0]
 
         const yearElement = this.shadow.getElementById('year')
         yearElement.innerHTML = year.toString()
         const monthElement = this.shadow.getElementById('month')
-        monthElement.innerHTML = MONTHS[month]
+        monthElement.innerHTML = MONTHS_$PLUGIN_ID[month]
 
         // Handle filling in the calendar
         const daysElement = this.shadow.getElementById('days')
@@ -340,8 +363,8 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const monthFormatted = (month + 1).toString().padStart(2, '0')
             const dayFormatted = day.toString().padStart(2, '0')
             const dateFormat = `${year}-${monthFormatted}-${dayFormatted}`
-
-            const dayElement = this.dayElementMaker(day.toString(), true, `${dateFormat}`, this.shadow, isToday)
+            const timeZone = this.timeZone ? 'T'+this.timeZone : ""
+            const dayElement = this.dayElementMaker(day.toString(), true, `${dateFormat}${timeZone}`, this.shadow, isToday)
             daysElement.appendChild(dayElement)
         }
 
@@ -366,50 +389,50 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
 
 
-const addBackButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
+const addBackButtonFunctionality_$PLUGIN_ID = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const retreatDateElement = outerbasePluginEditor.shadow.getElementById('back')
     retreatDateElement.onclick = () => {
         const monthElement = outerbasePluginEditor.shadow.getElementById('month')
         const yearElement = outerbasePluginEditor.shadow.getElementById('year')
 
-        const monthIndex = MONTHS.indexOf(monthElement.innerHTML)
+        const monthIndex = MONTHS_$PLUGIN_ID.indexOf(monthElement.innerHTML)
 
         const wrapToLastMonth = monthIndex - 1 < 0
         if (wrapToLastMonth) {
-            monthElement.innerHTML = MONTHS[MONTHS.length - 1]
+            monthElement.innerHTML = MONTHS_$PLUGIN_ID[MONTHS_$PLUGIN_ID.length - 1]
             const year = parseInt(yearElement.innerHTML) - 1
             yearElement.innerHTML = year.toString()
         } else {
-            monthElement.innerHTML = MONTHS[monthIndex - 1]
+            monthElement.innerHTML = MONTHS_$PLUGIN_ID[monthIndex - 1]
         }
         outerbasePluginEditor.render()
     }
 
 }
-const addForwardButtonFunctionality = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
+const addForwardButtonFunctionality_$PLUGIN_ID = (outerbasePluginEditor: OuterbasePluginEditor_$PLUGIN_ID) => {
     const advanceDateElement = outerbasePluginEditor.shadow.getElementById('forward')
     advanceDateElement.onclick = () => {
         const monthElement = outerbasePluginEditor.shadow.getElementById('month')
         const yearElement = outerbasePluginEditor.shadow.getElementById('year')
 
-        const monthIndex = MONTHS.indexOf(monthElement.innerHTML)
+        const monthIndex = MONTHS_$PLUGIN_ID.indexOf(monthElement.innerHTML)
 
-        const wrapToFirstMonth = monthIndex + 1 >= MONTHS.length
+        const wrapToFirstMonth = monthIndex + 1 >= MONTHS_$PLUGIN_ID.length
         if (wrapToFirstMonth) {
-            monthElement.innerHTML = MONTHS[0]
+            monthElement.innerHTML = MONTHS_$PLUGIN_ID[0]
             const year = parseInt(yearElement.innerHTML) + 1
             yearElement.innerHTML = year.toString()
         } else {
-            monthElement.innerHTML = MONTHS[monthIndex + 1]
+            monthElement.innerHTML = MONTHS_$PLUGIN_ID[monthIndex + 1]
         }
         outerbasePluginEditor.render()
     }
 
 }
 
-const FUNCTIONALITIES = [
-    addBackButtonFunctionality,
-    addForwardButtonFunctionality
+const FUNCTIONALITIES_$PLUGIN_ID = [
+    addBackButtonFunctionality_$PLUGIN_ID,
+    addForwardButtonFunctionality_$PLUGIN_ID
 ]
 
 window.customElements.define("outerbase-plugin-cell-$PLUGIN_ID", OuterbasePluginCell_$PLUGIN_ID)
