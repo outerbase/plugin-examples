@@ -323,7 +323,7 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
         super()
 
         this.shadow = this.attachShadow({ mode: "open" })
-        this.shadow.appendChild(templateConfiguration.content.cloneNode(true))
+        this.shadow.appendChild(templateConfiguration_$PLUGIN_ID.content.cloneNode(true))
     }
 
     connectedCallback() {
