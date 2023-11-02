@@ -13,7 +13,6 @@ const createOuterbaseEvent_$PLUGIN_ID = (data: any) => new CustomEvent('custom-c
 })
 
 const sendToOuterbase_$PLUGIN_ID = ({ outerbaseElement, outerbaseEvent }: SendToOuterbaseParams_$PLUGIN_ID) => {
-    console.log('Dispatching', outerbaseEvent)
     outerbaseElement.dispatchEvent(outerbaseEvent)
 }
 
@@ -28,8 +27,10 @@ templateCell_$PLUGIN_ID.innerHTML = `
     gap: 8px;
     justify-content: space-between;
     height: 100%;
-    width: calc(100% - 36px);
-    padding: 0 18px;
+    width: calc(100% - 16px);
+    padding: 0 8px;
+    font-family: var(--ob-cell-font-family);
+    color: var(--ob-text-color);
 }
 input {
     height: 100%;
@@ -41,19 +42,33 @@ input {
     text-overflow: ellipsis;
     overflow: hidden;
     font-family: var(--ob-cell-font-family);
-    font-size: 12px;
     color: var(--ob-text-color);
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
 
 }
 input:focus {
     outline: none;
 }
+svg {
+    padding: 2px;
+    background-color: var(--ob-background-color);
+    fill: var(--ob-text-color);
+    cursor: pointer;
+  }
+  svg:hover {
+    opacity: .8;
+  }
 
 </style>
 <div id="container">
     <input type="text" id="dateDisplay" />
+    <svg id="calendar-button" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 256 256">
+        <path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"/>
+    </svg>
 </div>
-`
+`;
 
 var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
@@ -236,13 +251,13 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     }
     connectedCallback() {
         const cellValue = this.getAttribute('cellvalue')
+        const calendarButton = this.shadow.getElementById('calendar-button') as HTMLElement
         const cell = this.shadow.getElementById('dateDisplay') as HTMLInputElement
         cell.value = cellValue
-
-        cell.addEventListener("focus", () => {
+        calendarButton.onclick = () => {
             const ev = createOuterbaseEvent_$PLUGIN_ID({ action: 'onedit', value: true })
             sendToOuterbase_$PLUGIN_ID({ outerbaseElement: this, outerbaseEvent: ev })
-        });
+        }
     }
 }
 class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
@@ -258,7 +273,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         dayElement.style.cursor = 'pointer'
         dayElement.className = isActive ? "active" : ""
         dayElement.onclick = (event) => {
-            console.log('You clicked on', value)
             const updateCellEvent = createOuterbaseEvent_$PLUGIN_ID({ action: 'updatecell', value })
             sendToOuterbase_$PLUGIN_ID({ outerbaseElement: this, outerbaseEvent: updateCellEvent })
     
@@ -291,9 +305,8 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         }
         const validDate = !isNaN(new Date(inputWithoutTime).getTime()) ? inputWithoutTime : new Date().toISOString().split('T')[0]
 
-        console.log(inputWithoutTime)
         const {year, month, day} = getDateFromCell(validDate)
-        console.log(year, month, day)
+
         const cellAsDate = new Date(year, month, day)
 
         const yearElement = this.shadow.getElementById('year')
@@ -344,9 +357,9 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const monthFormatted = (monthHandleRollover).toString().padStart(2, '0')
             const fixedDay = lastDayOfPreviousMonth - day + 1
             const dayFormatted = fixedDay.toString().padStart(2, '0')
-
+            const timeZone = this.timeZone ? 'T'+this.timeZone : ""
             const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
-            const dayElement = this.dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
+            const dayElement = this.dayElementMaker(fixedDay.toString(), false, `${dateFormat}${timeZone}`, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
 
@@ -379,8 +392,8 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
             const fixedDay = monthAfterDay - lastDayOfMonth + 1
             const dayFormatted = fixedDay.toString().padStart(2, '0')
             const dateFormat = `${yearHandleRollover}-${monthFormatted}-${dayFormatted}`
-
-            const dayElement = this.dayElementMaker(fixedDay.toString(), false, dateFormat, this.shadow, false)
+            const timeZone = this.timeZone ? 'T'+this.timeZone : ""
+            const dayElement = this.dayElementMaker(fixedDay.toString(), false, `${dateFormat}${timeZone}`, this.shadow, false)
             daysElement.appendChild(dayElement)
         }
     }
