@@ -1,8 +1,5 @@
 const templateCell_$PLUGIN_ID = document.createElement("template");
 templateCell_$PLUGIN_ID.innerHTML = `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200&display=swap" rel="stylesheet">
 <style>
     #container { 
         display: flex;
@@ -12,7 +9,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
         height: 100%;
         width: calc(100% - 16px);
         padding: 0 8px;
-        font-family: var(--ob-font-family);
+        font-family: var(--ob-cell-font-family);
         color: var(--ob-text-color);
     }
     input {
@@ -24,6 +21,11 @@ templateCell_$PLUGIN_ID.innerHTML = `
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        font-family: var(--ob-cell-font-family);
+        color: var(--ob-text-color);
+        font-size: 12px;
+        font-weight: 400;
+        font-style: normal;
     }
     input:focus {
         outline: none;
@@ -31,50 +33,30 @@ templateCell_$PLUGIN_ID.innerHTML = `
     #view-json {
         color: var(--ob-text-color);
         text-align: center;
-        font-family: var(--ob-font-family);
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        letter-spacing: 1.2px;
+        font-family: var(--ob-cell-font-family);
         background-color: var(--ob-background-color);
         border-radius: 5px;
         filter: invert(100%);
         border: 0px;
-        padding: 5px;
+        width: 22px;
+        height: 18px;
     }
+
+svg {
+  padding: 2px;
+  background-color: var(--ob-background-color);
+  fill: var(--ob-text-color);
+  cursor: pointer;
+}
+svg:hover {
+  opacity: .8;
+}
 </style>
 <div id="container">
     <input type="text" id="jsonValue" placeholder="Enter JSON...">
-    <button id="view-json">{;}</button>
+    <svg id="view-json" xmlns="http://www.w3.org/2000/svg" width="22" height="18" viewBox="0 0 256 256"><path d="M43.18,128a29.78,29.78,0,0,1,8,10.26c4.8,9.9,4.8,22,4.8,33.74,0,24.31,1,36,24,36a8,8,0,0,1,0,16c-17.48,0-29.32-6.14-35.2-18.26-4.8-9.9-4.8-22-4.8-33.74,0-24.31-1-36-24-36a8,8,0,0,1,0-16c23,0,24-11.69,24-36,0-11.72,0-23.84,4.8-33.74C50.68,38.14,62.52,32,80,32a8,8,0,0,1,0,16C57,48,56,59.69,56,84c0,11.72,0,23.84-4.8,33.74A29.78,29.78,0,0,1,43.18,128ZM240,120c-23,0-24-11.69-24-36,0-11.72,0-23.84-4.8-33.74C205.32,38.14,193.48,32,176,32a8,8,0,0,0,0,16c23,0,24,11.69,24,36,0,11.72,0,23.84,4.8,33.74a29.78,29.78,0,0,0,8,10.26,29.78,29.78,0,0,0-8,10.26c-4.8,9.9-4.8,22-4.8,33.74,0,24.31-1,36-24,36a8,8,0,0,0,0,16c17.48,0,29.32-6.14,35.2-18.26,4.8-9.9,4.8-22,4.8-33.74,0-24.31,1-36,24-36a8,8,0,0,0,0-16Z"></path></svg>
 </div>
 `;
-
-const templateEditor_$PLUGIN_ID = document.createElement("template");
-templateEditor_$PLUGIN_ID.innerHTML = `
-<style>
-    #container {
-        max-width: 400px;
-    }
-
-    #jsonEditor {
-        width: 250px;
-        height: 250px;
-    }
-    input:focus {
-        outline: none;
-    }
-</style>
-<div>
-    <textarea
-        id="jsonEditor"
-    ></textarea>
-</div>
-`;
-
-// No Configuration needed
-class OuterbasePluginConfig_$PLUGIN_ID {
-  constructor(object) {}
-}
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
   static get observedAttributes() {
@@ -87,7 +69,6 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     super();
 
     this.shadow = this.attachShadow({ mode: "open" });
-
     this.shadow.appendChild(templateCell_$PLUGIN_ID.content.cloneNode(true));
   }
   decodeAttributeByName = (fromClass, name) => {
@@ -95,12 +76,12 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     const decodedJSON = encodedJSON
       ?.replace(/&quot;/g, '"')
       ?.replace(/&#39;/g, "'");
-
+    console.log("This is it before all that goes on", decodedJSON);
     try {
-      const decodedAttribute = JSON.stringify(JSON.parse(decodedJSON.replace( /\n/g, '' )));
+      const decodedAttribute = JSON.stringify(JSON.parse(decodedJSON));
       return decodedAttribute;
     } catch (e) {
-      return JSON.stringify({});
+      return decodedJSON;
     }
   };
 
@@ -113,40 +94,23 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     this.config = new OuterbasePluginConfig_$PLUGIN_ID(
       JSON.parse(this.getAttribute("configuration"))
     );
-
-    let cellValue;
-    cellValue = JSON.stringify(
-      JSON.parse(this.decodeAttributeByName(this, "cellvalue")),
-      undefined,
-      2
-    );
+    const editJSONButton = this.shadow.getElementById("view-json");
     const cell = this.shadow.getElementById("jsonValue");
+    const cellValue = this.decodeAttributeByName(this, "cellvalue");
+    console.log('Cell Value after decoded')
     cell.value = cellValue;
 
-    var jsonValue = this.shadow.getElementById("jsonValue");
-    var viewImageButton = this.shadow.getElementById("view-json");
-
-    jsonValue.addEventListener("focus", () => {
+    cell.addEventListener("focus", () => {
       this.callCustomEvent({
         action: "onstopedit",
         value: true,
       });
-    });
+    })
 
-    jsonValue.addEventListener("blur", () => {
-      let jsonCellValue;
-      try {
-        jsonCellValue = JSON.stringify(
-          JSON.parse(jsonValue.value),
-          undefined,
-          2
-        );
-      } catch (e) {
-        jsonCellValue = JSON.stringify({});
-      }
+    cell.addEventListener("blur", () => {
       this.callCustomEvent({
         action: "updatecell",
-        value: jsonCellValue.replace( /\n/g, '' ),
+        value: cell.value,
       });
 
       this.callCustomEvent({
@@ -155,35 +119,27 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
       });
     });
 
-    jsonValue.addEventListener("keydown", (e) => {
+    cell.addEventListener("keydown", (e) => {
       if (e.code == "Enter" && e.shiftKey) {
         return;
       }
       if (e.code != "Enter") {
         return;
       }
-      let jsonCellValue;
-      try {
-        jsonCellValue = JSON.stringify(
-          JSON.parse(jsonValue.value),
-          undefined,
-          2
-        );
-      } catch (e) {
-        jsonCellValue = JSON.stringify({});
-      }
+
       this.callCustomEvent({
         action: "updatecell",
-        value: jsonCellValue.replace( /\n/g, '' ),
+        value: cell.value,
       });
 
       this.callCustomEvent({
         action: "onstopedit",
         value: true,
       });
-      jsonValue.blur();
+      cell.blur();
     });
-    viewImageButton.addEventListener("click", () => {
+
+    editJSONButton.addEventListener("click", () => {
       this.callCustomEvent({
         action: "onedit",
         value: true,
@@ -192,9 +148,42 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
   }
 
   callCustomEvent(data) {
-    const event = createCustomEvent(data);
+    const event = createCustomEvent_$PLUGIN_ID(data);
     this.dispatchEvent(event);
   }
+}
+const CELL_RENDERER_NAME_$PLUGIN_ID = "outerbase-plugin-cell-$PLUGIN_ID";
+const CELL_EDITOR_NAME_$PLUGIN_ID = "outerbase-plugin-editor-$PLUGIN_ID";
+const templateEditor_$PLUGIN_ID = document.createElement("template");
+templateEditor_$PLUGIN_ID.innerHTML = `
+<style>
+    #container {
+      margin-top: 4px;
+    }
+
+    #jsonEditor {
+        width: 314px;
+        height: 165px;
+        border-radius: 20px;
+        color: var(--ob-text-color);
+        border-color: var(--ob-border-color);
+        background-color: var(--ob-background-color);
+    }
+
+    input:focus {
+        outline: none;
+    }
+
+</style>
+<div id="container">
+    <textarea
+        id="jsonEditor"
+    ></textarea>
+</div>
+`;
+
+class OuterbasePluginConfig_$PLUGIN_ID {
+  constructor(object) {}
 }
 
 class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
@@ -211,7 +200,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     this.shadow = this.attachShadow({ mode: "open" });
 
     this.shadow.appendChild(templateEditor_$PLUGIN_ID.content.cloneNode(true));
-
+    
     // Parse the configuration object from the `configuration` attribute
     // and store it in the `config` property.
     this.config = new OuterbasePluginConfig_$PLUGIN_ID(
@@ -225,6 +214,7 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       ?.replace(/&#39;/g, "'");
 
     try {
+      console.log("Im stringifying and parsing", decodedJSON);
       return JSON.stringify(JSON.parse(decodedJSON));
     } catch (e) {
       return JSON.stringify({});
@@ -236,27 +226,26 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
   // event listeners, default values to display, etc.
   connectedCallback() {
     const cellValue = this.decodeAttributeByName(this, "cellvalue");
-
     const jsonEditor = this.shadow.getElementById("jsonEditor");
-    jsonEditor.innerHTML = JSON.stringify(JSON.parse(cellValue), undefined, 2);
+    try {
+      const parsedJSON = JSON.parse(cellValue);
+      jsonEditor.innerHTML = JSON.stringify(parsedJSON, undefined, 2);
+    } catch {
+      jsonEditor.innerHTML = cellValue;
+    }
 
     jsonEditor.addEventListener("blur", (ev) => {
-      let cellEditorValue;
       try {
-        cellEditorValue = JSON.stringify(
-          JSON.parse(jsonEditor.value),
-          undefined,
-          2
-        );
+        this.callCustomEvent({
+          action: "updatecell",
+          value: jsonEditor.value,
+        });
       } catch (e) {
-        cellEditorValue = JSON.stringify({});
+        this.callCustomEvent({
+          action: "updatecell",
+          value: jsonEditor.value,
+        });
       }
-
-      this.callCustomEvent({
-        action: "updatecell",
-        value: cellEditorValue.replace( /\n/g, '' ),
-      });
-
       this.callCustomEvent({
         action: "onstopedit",
         value: true,
@@ -272,20 +261,16 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       }
       e.preventDefault();
 
-      let cellEditorValue;
-      try {
-        cellEditorValue = JSON.stringify(
-          JSON.parse(jsonEditor.value.replace( /\n/g, '' )),
-          undefined,
-          2
-        );
-      } catch (e) {
-        cellEditorValue = JSON.stringify({});
+      if (JSON.parse(cellValue) === JSON.parse(jsonEditor.value)){
+        this.callCustomEvent({
+          action: "updatecell",
+          value: cellValue,
+        });
       }
-
+      console.log('Comparing', JSON.stringify(JSON.parse(cellValue)) === JSON.stringify(JSON.parse(jsonEditor.value)),)
       this.callCustomEvent({
         action: "updatecell",
-        value: cellEditorValue.replace( /\n/g, '' ),
+        value: jsonEditor.value,
       });
 
       this.callCustomEvent({
@@ -295,12 +280,12 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     });
   }
   callCustomEvent(data) {
-    const event = createCustomEvent(data);
+    const event = createCustomEvent_$PLUGIN_ID(data);
     this.dispatchEvent(event);
   }
 }
 
-const createCustomEvent = (data) =>
+const createCustomEvent_$PLUGIN_ID = (data) =>
   new CustomEvent("custom-change", {
     detail: data,
     bubbles: true, // If you want the event to bubble up through the DOM
@@ -311,11 +296,10 @@ const createCustomEvent = (data) =>
 // Changing the name of this variable will cause your plugin to not work properly
 // when installed in Outerbase.
 window.customElements.define(
-  "outerbase-plugin-cell-$PLUGIN_ID",
+  CELL_RENDERER_NAME_$PLUGIN_ID,
   OuterbasePluginCell_$PLUGIN_ID
 );
 window.customElements.define(
-  "outerbase-plugin-editor-$PLUGIN_ID",
+  CELL_EDITOR_NAME_$PLUGIN_ID,
   OuterbasePluginEditor_$PLUGIN_ID
 );
-
