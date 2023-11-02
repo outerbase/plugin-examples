@@ -13,8 +13,5 @@
     "terser-webpack-plugin": "^5.3.9",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "json-colorizer": "^2.2.2"
   }
 }
