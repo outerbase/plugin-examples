@@ -22,18 +22,27 @@ const daysInMonth = (month: number, year: number) => new Date(year, month + 1, 0
 var templateCell_$PLUGIN_ID = document.createElement('template')
 templateCell_$PLUGIN_ID.innerHTML = `
 <style>
+#container { 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+    height: 100%;
+    width: calc(100% - 36px);
+    padding: 0 18px;
+}
 input {
+    height: 100%;
+    flex: 1;
     background-color: transparent;
     border: 0;
+    min-width: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    font-family: var(--ob-font-family);
-    line-height: 36px;
+    font-family: var(--ob-cell-font-family);
     font-size: 12px;
-    font-family: var(--ob-font-family);
-    font-weight: 400;
-    font-style: normal;
+    color: var(--ob-text-color);
 
 }
 input:focus {
@@ -50,9 +59,9 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
-    margin-top: 4px 
+    margin-top: 4px;
     display: flex;
-    font-family: var(--ob-font-family);
+    font-family: var(--ob-cell-font-family);
     width: 314px;
     color: var(--ob-text-color);
     border-radius: 20px;
