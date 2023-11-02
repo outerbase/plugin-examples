@@ -16,7 +16,7 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     output: {
-        filename: 'bundle.js',
+        filename: 'calendarBundle.js',
         iife: false,
         path: path.resolve(__dirname, 'dist'),
     },
