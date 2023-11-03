@@ -1,6 +1,6 @@
 # Getting started with Outerbase Plugins
 
-This guide helps you create plugins that fit well and look good within the Outerbase platform. Using Tailwind CSS and Web Components, our approach offers flexibility and ease of customization. Here you'll find guidelines on color, typography, and borders, along with tips for using Web Components effectively.
+This guide helps you create plugins that fit well and look good within the Outerbase platform. Using Web Components, our approach offers flexibility and ease of customization. Here you'll find guidelines on color, typography, and borders, along with tips for using Web Components effectively.
 
 
 ---
@@ -25,7 +25,7 @@ customElements.define('my-component', MyComponent);
 
 ### Styling Web Components
 
-To align your web components with our style guide, you can use inline styles or include a `<style>` tag within the `shadow DOM`.
+In your project, we've defined a set of named CSS variables so that you align your web components with our style guide. These variables make it easy to customize the look and feel of your components while adhering to a shared design system.
 
 ```javascript
 class StyledComponent extends HTMLElement {
@@ -33,9 +33,13 @@ class StyledComponent extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.shadowRoot.innerHTML = `
       <style>
-        /* Add your Tailwind classes or custom CSS here */
+        .paragraph {
+          background-color: var(--ob-background-color);
+          font-family: var(--ob-font-family);
+          width: 25px;
+        }
       </style>
-      <p class="font-inter font-regular text-14 text-neutral-700 dark:text-neutral-300">Styled Body Text</p>
+      <p class="paragraph">Styled Body Text</p>
     `;
   }
 }
@@ -43,9 +47,20 @@ class StyledComponent extends HTMLElement {
 customElements.define('styled-component', StyledComponent);
 ```
 
+#### Available CSS Variables
+
+Here are the named CSS variables available for use in your web components:
+
+```css
+    --ob-background-color: #0A0A0A;
+    --ob-text-color: #D4D4D4;
+    --ob-border-color: #262626;
+    --ob-font-family: "Inter", sans-serif;    
+    --ob-cell-font-family: "input-mono", monospace;
+```
 ---
 
-Feel free to use this style guide as a reference when creating your Outerbase plugins. If you have any questions or suggestions, please don't hesitate to contribute or reach out. Happy coding! 🎉
+
 ## 🎨 Color Palette
 
 - **Background**: `neutral-50` for light mode, `dark:neutral-950` for dark mode
@@ -85,11 +100,4 @@ Feel free to use this style guide as a reference when creating your Outerbase pl
 
 ---
 
-## 🌓 Modes
-
-- **Light Mode**: Use the default colors specified above.
-- **Dark Mode**: Use the `dark:` prefixed colors.
-
----
-
-Feel free to use this style guide as a reference when creating your plugins. If you have any questions or suggestions, please don't hesitate to contribute or reach out. Happy coding! 🎉
+Feel free to use this style guide as a reference when creating your Outerbase plugins. If you have any questions or suggestions, please don't hesitate to contribute or reach out. Happy coding! 🎉

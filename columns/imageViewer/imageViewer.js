@@ -1,4 +1,4 @@
-var privileges = [
+var privileges_$PLUGIN_ID = [
     'cellValue',
     'configuration',
 ]
@@ -12,8 +12,8 @@ templateCell_$PLUGIN_ID.innerHTML = `
         gap: 8px;
         justify-content: space-between;
         height: 100%;
-        width: calc(100% - 16px);
-        padding: 0 8px;
+        width: calc(100% - 36px);
+        padding: 0 18px;
     }
 
     input {
@@ -25,6 +25,9 @@ templateCell_$PLUGIN_ID.innerHTML = `
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
+        font-family: var(--ob-cell-font-family);
+        font-size: 12px;
+        color: var(--ob-text-color);
     }
 
     input:focus {
@@ -42,7 +45,12 @@ var templateEditor_$PLUGIN_ID = document.createElement('template')
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
     #container {
-        max-width: 400px;
+        margin-top: 4px;
+        width: 320px;
+        height: 320px;
+        border: 1px solid black;
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     #image-old {
@@ -60,11 +68,54 @@ templateEditor_$PLUGIN_ID.innerHTML = `
         background-repeat: no-repeat;
         background-size: contain;
     }
+
+    #image-details {
+        display: none;
+        max-width: calc(100% - 56px);
+
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        align-items: center;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        border: 1px solid white;
+        border-radius: 999px;
+        color: white;
+        background: rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(2px);
+        transition: backdrop-filter 0.3s ease, background 0.3s ease;
+    }
+
+    #image-details:hover {
+        background: rgba(255, 255, 255, 0.20);
+        backdrop-filter: blur(0px);
+        cursor: pointer;
+    }
+
+    #image-details-title {
+        margin-right: 32px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 50%;
+        direction: rtl;
+        text-align: left;
+    }
+
+    #image-details-size {
+        text-align: right;
+    }
 </style>
 
 <div id="container">
     <div id="background-image">
         <img id="image" style="visibility: hidden;" />
+    </div>
+
+    <div id="image-details">
+    
     </div>
 </div>
 `
@@ -79,7 +130,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return privileges_$PLUGIN_ID
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
@@ -184,7 +235,118 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
         if (imageView && backgroundImageView) {
             imageView.src = this.getAttribute('cellvalue')
             backgroundImageView.style.backgroundImage = `url(${this.getAttribute('cellvalue')})`
+        
+            const imageUrl = this.getAttribute('cellvalue');
+            this.getImageSize(imageUrl).then(size => {
+                const sizeInKilobytes = this.bytesToKilobytes(size);
+
+                // Update image details
+                this.shadow.getElementById("image-details").innerHTML = `
+                    <div id="image-details-title">${this.extractImageName(imageUrl)}</div>
+                    <div id="image-details-size">${sizeInKilobytes.toFixed(1)} KB</div>
+                `
+                this.shadow.getElementById("image-details").style.display = "flex";
+            });
         }
+    }
+
+    getImageSize(url) {
+        return fetch(url, { method: 'GET' }) // Use HEAD request to get headers without downloading the whole image
+            .then(response => {
+                const contentLength = response.headers.get('content-length');
+                if (contentLength) {
+                    return parseInt(contentLength, 10);
+                } else {
+                    // If content-length header is not available, fetch the whole image and compute its size
+                    return response.blob().then(data => data.size);
+                }
+            });
+    }
+
+    extractImageName(url) {
+        return url.split('/').pop();
+    }
+
+    bytesToKilobytes(bytes) {
+        return bytes / 1024;
+    }
+}
+
+
+/**
+ * ******************
+ * Configuration View
+ * ******************
+ * 
+ *  ░░░░░░░░░░░░░░░░░
+ *  ░░░░░▀▄░░░▄▀░░░░░
+ *  ░░░░▄█▀███▀█▄░░░░
+ *  ░░░█▀███████▀█░░░
+ *  ░░░█░█▀▀▀▀▀█░█░░░
+ *  ░░░░░░▀▀░▀▀░░░░░░
+ *  ░░░░░░░░░░░░░░░░░
+ * 
+ * When a user either installs a plugin onto a table resource for the first time
+ * or they configure an existing installation, this is the view that is presented
+ * to the user. For many plugin applications it's essential to capture information
+ * that is required to allow your plugin to work correctly and this is the best
+ * place to do it.
+ * 
+ * It is a requirement that a save button that triggers the `OuterbaseEvent.onSave`
+ * event exists so Outerbase can complete the installation or preference update
+ * action.
+ */
+var templateConfiguration_$PLUGIN_ID = document.createElement("template")
+templateConfiguration_$PLUGIN_ID.innerHTML = `
+<style>
+    #container {
+        display: flex;
+        height: 100%;
+        overflow-y: scroll;
+        padding: 40px 50px 65px 40px;
+    }
+</style>
+
+<div id="container">
+    
+</div>
+`
+
+class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
+    static get observedAttributes() {
+        return privileges_$PLUGIN_ID
+    }
+
+    config = new OuterbasePluginConfig_$PLUGIN_ID({})
+
+    constructor() {
+        super()
+
+        this.shadow = this.attachShadow({ mode: "open" })
+        this.shadow.appendChild(templateConfiguration_$PLUGIN_ID.content.cloneNode(true))
+    }
+
+    connectedCallback() {
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
+        this.config.cellValue = decodeAttributeByName(this, "cellValue")
+        this.render()
+    }
+
+    render() {
+        this.shadow.querySelector("#container").innerHTML = `
+        <div>
+            <h1>Hello, Configuration World!</h1>
+            <button id="saveButton">Save View</button>
+        </div>
+        `
+
+        var saveButton = this.shadow.getElementById("saveButton");
+        saveButton.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseEvent.onSave,
+                value: {}
+            })
+        });
     }
 }
 
@@ -193,3 +355,4 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 // when installed in Outerbase.
 window.customElements.define('outerbase-plugin-cell-$PLUGIN_ID', OuterbasePluginCell_$PLUGIN_ID)
 window.customElements.define('outerbase-plugin-editor-$PLUGIN_ID', OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)
