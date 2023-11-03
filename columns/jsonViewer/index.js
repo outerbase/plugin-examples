@@ -84,10 +84,9 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     this.config = new OuterbasePluginConfig_$PLUGIN_ID(
       this.decodeAttributeByName(this, "configuration")
     );
-    
+
     let metadata = JSON.parse(this.decodeAttributeByName(this, "metadata"));
     this.config.theme = metadata?.theme;
-
 
     var element = this.shadow.querySelector(".theme-container");
     element.classList.remove("dark");
@@ -276,7 +275,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
   theme = "light";
 
   constructor(object) {
-    this.theme = object.theme ? object.theme : "light";
+    this.theme = object?.theme ? object?.theme : "light";
   }
 }
 
