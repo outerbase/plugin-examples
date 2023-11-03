@@ -332,7 +332,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
   theme = "light";
 
   constructor(object: any) {
-    this.theme = object.theme ? object.theme : "light";
+    this.theme = object?.theme ? object.theme : "light";
   }
 }
 
