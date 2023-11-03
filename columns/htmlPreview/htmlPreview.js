@@ -1,32 +1,29 @@
-var privileges_$PLUGIN_ID = [
-    'cellValue',
-    'configuration',
-]
+var privileges_$PLUGIN_ID = ["cellValue", "configuration"];
 
 var OuterbaseEvent_$PLUGIN_ID = {
-    // The user has triggered an action to save updates
-    onSave: "onSave",
-}
+  // The user has triggered an action to save updates
+  onSave: "onSave",
+};
 
 var triggerEvent_$PLUGIN_ID = (fromClass, data) => {
-    const event = new CustomEvent("custom-change", {
-        detail: data,
-        bubbles: true,
-        composed: true
-    });
+  const event = new CustomEvent("custom-change", {
+    detail: data,
+    bubbles: true,
+    composed: true,
+  });
 
-    fromClass.dispatchEvent(event);
-}
+  fromClass.dispatchEvent(event);
+};
 
 var decodeAttributeByName_$PLUGIN_ID = (fromClass, name) => {
-    const encodedJSON = fromClass.getAttribute(name);
-    const decodedJSON = encodedJSON
-        ?.replace(/&quot;/g, '"')
-        ?.replace(/&#39;/g, "'");
-    return decodedJSON ? JSON.parse(decodedJSON) : {};
-}
+  const encodedJSON = fromClass.getAttribute(name);
+  const decodedJSON = encodedJSON
+    ?.replace(/&quot;/g, '"')
+    ?.replace(/&#39;/g, "'");
+  return decodedJSON ? JSON.parse(decodedJSON) : {};
+};
 
-var templateCell_$PLUGIN_ID = document.createElement('template')
+var templateCell_$PLUGIN_ID = document.createElement("template");
 templateCell_$PLUGIN_ID.innerHTML = `
 <style>
     #container { 
@@ -96,11 +93,13 @@ templateCell_$PLUGIN_ID.innerHTML = `
         </svg>    
     </div>
 </div>
-`
+`;
 
-{/* <button id="view-html">View</button> */}
+{
+  /* <button id="view-html">View</button> */
+}
 
-var templateEditor_$PLUGIN_ID = document.createElement('template')
+var templateEditor_$PLUGIN_ID = document.createElement("template");
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
     #container {
@@ -152,174 +151,185 @@ templateEditor_$PLUGIN_ID.innerHTML = `
     <div id="error"></div>
     <div id="content"></div>
 </div>
-`
+`;
 
 // This is the configuration object that Outerbase passes to your plugin.
 // Define all of the configuration options that your plugin requires here.
 class OuterbasePluginConfig_$PLUGIN_ID {
-    theme = "light";
+  theme = "light";
 
-    constructor(object) {
-        this.theme = object.theme ? object.theme : "light";
-    }
+  constructor(object) {
+    this.theme = object.theme ? object.theme : "light";
+  }
 }
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
-    static get observedAttributes() {
-        return privileges_$PLUGIN_ID
-    }
+  static get observedAttributes() {
+    return privileges_$PLUGIN_ID;
+  }
 
-    config = new OuterbasePluginConfig_$PLUGIN_ID({})
+  config = new OuterbasePluginConfig_$PLUGIN_ID({});
 
-    constructor() {
-        super()
+  constructor() {
+    super();
 
-        // The shadow DOM is a separate DOM tree that is attached to the element.
-        // This allows us to encapsulate our styles and markup. It also prevents
-        // styles from the parent page from leaking into our plugin.
-        this.shadow = this.attachShadow({ mode: 'open' })
-        this.shadow.appendChild(templateCell_$PLUGIN_ID.content.cloneNode(true))
-    }
+    // The shadow DOM is a separate DOM tree that is attached to the element.
+    // This allows us to encapsulate our styles and markup. It also prevents
+    // styles from the parent page from leaking into our plugin.
+    this.shadow = this.attachShadow({ mode: "open" });
+    this.shadow.appendChild(templateCell_$PLUGIN_ID.content.cloneNode(true));
+  }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
+  attributeChangedCallback(name, oldValue, newValue) {
+    this.config = new OuterbasePluginConfig_$PLUGIN_ID(
+      decodeAttributeByName_$PLUGIN_ID(this, "configuration")
+    );
 
-        let metadata = decodeAttributeByName_$PLUGIN_ID(this, "metadata")
-        this.config.theme = metadata?.theme
+    let metadata = decodeAttributeByName_$PLUGIN_ID(this, "metadata");
+    this.config.theme = metadata?.theme;
 
-        var element = this.shadow.querySelector(".theme-container")
-        element.classList.remove("dark")
-        element.classList.add(this.config.theme);
-    }
+    var element = this.shadow.querySelector(".theme-container");
+    element.classList.remove("dark");
+    element.classList.add(this.config.theme);
+  }
 
-    // This function is called when the UI is made available into the DOM. Put any
-    // logic that you want to run when the element is first stood up here, such as
-    // event listeners, default values to display, etc.
-    connectedCallback() {
-        // Parse the configuration object from the `configuration` attribute
-        // and store it in the `config` property.
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            JSON.parse(this.getAttribute('configuration'))
-        )
+  // This function is called when the UI is made available into the DOM. Put any
+  // logic that you want to run when the element is first stood up here, such as
+  // event listeners, default values to display, etc.
+  connectedCallback() {
+    // Parse the configuration object from the `configuration` attribute
+    // and store it in the `config` property.
+    this.config = new OuterbasePluginConfig_$PLUGIN_ID(
+      JSON.parse(this.getAttribute("configuration"))
+    );
 
-        // Set default value based on input
-        this.shadow.querySelector('#html-value').value = this.getAttribute('cellvalue')
+    // Set default value based on input
+    this.shadow.querySelector("#html-value").value =
+      this.getAttribute("cellvalue");
 
-        var imageInput = this.shadow.getElementById("html-value");
-        var viewImageButton = this.shadow.getElementById("action-button");
+    var imageInput = this.shadow.getElementById("html-value");
+    var viewImageButton = this.shadow.getElementById("action-button");
 
-        if (imageInput && viewImageButton) {
-            imageInput.addEventListener("focus", () => {
-                // Tell Outerbase to start editing the cell
-                this.callCustomEvent({
-                    action: 'onstopedit',
-                    value: true
-                })
-            });
+    if (imageInput && viewImageButton) {
+      imageInput.addEventListener("focus", () => {
+        // Tell Outerbase to start editing the cell
+        this.callCustomEvent({
+          action: "onstopedit",
+          value: true,
+        });
+      });
 
-            imageInput.addEventListener("blur", () => {
-                // Tell Outerbase to update the cells raw value
-                this.callCustomEvent({
-                    action: 'cellvalue',
-                    value: imageInput.value
-                })
-
-                // Then stop editing the cell and close the editor view
-                this.callCustomEvent({
-                    action: 'onstopedit',
-                    value: true
-                })
-            });
-
-            viewImageButton.addEventListener("click", () => {
-                this.callCustomEvent({
-                    action: 'onedit',
-                    value: true
-                })
-            });
-        }
-    }
-
-    callCustomEvent(data) {
-        const event = new CustomEvent('custom-change', {
-            detail: data,
-            bubbles: true,  // If you want the event to bubble up through the DOM
-            composed: true  // Allows the event to pass through shadow DOM boundaries
+      imageInput.addEventListener("blur", () => {
+        // Tell Outerbase to update the cells raw value
+        this.callCustomEvent({
+          action: "cellvalue",
+          value: imageInput.value,
         });
 
-        this.dispatchEvent(event);
+        // Then stop editing the cell and close the editor view
+        this.callCustomEvent({
+          action: "onstopedit",
+          value: true,
+        });
+      });
+
+      viewImageButton.addEventListener("click", () => {
+        this.callCustomEvent({
+          action: "onedit",
+          value: true,
+        });
+      });
     }
+  }
+
+  callCustomEvent(data) {
+    const event = new CustomEvent("custom-change", {
+      detail: data,
+      bubbles: true, // If you want the event to bubble up through the DOM
+      composed: true, // Allows the event to pass through shadow DOM boundaries
+    });
+
+    this.dispatchEvent(event);
+  }
 }
 
 class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
-    static get observedAttributes() {
-        return privileges
+  static get observedAttributes() {
+    return privileges;
+  }
+
+  static NO_VALUE_HEADER = "Nothing to preview";
+  static BAD_VALUE_HEADER = "Failed to load preview";
+
+  config = new OuterbasePluginConfig_$PLUGIN_ID({});
+
+  constructor() {
+    super();
+
+    // The shadow DOM is a separate DOM tree that is attached to the element.
+    // This allows us to encapsulate our styles and markup. It also prevents
+    // styles from the parent page from leaking into our plugin.
+    this.shadow = this.attachShadow({ mode: "open" });
+    this.shadow.appendChild(templateEditor_$PLUGIN_ID.content.cloneNode(true));
+
+    // Parse the configuration object from the `configuration` attribute
+    // and store it in the `config` property.
+    this.config = new OuterbasePluginConfig_$PLUGIN_ID(
+      JSON.parse(this.getAttribute("configuration"))
+    );
+  }
+
+  // This function is called when the UI is made available into the DOM. Put any
+  // logic that you want to run when the element is first stood up here, such as
+  // event listeners, default values to display, etc.
+  connectedCallback() {
+    const value = this.getAttribute("cellValue");
+
+    this.shadow.querySelector("#container").style.padding = "0px";
+    this.shadow.querySelector("#header").style.display = "block";
+    this.shadow.querySelector("#hr").style.display = "block";
+
+    if (this.isEmpty(value)) {
+      this.shadow.querySelector("#header").innerHTML =
+        OuterbasePluginEditor_$PLUGIN_ID.NO_VALUE_HEADER;
+      return;
     }
 
-    static NO_VALUE_HEADER = "Nothing to preview";
-    static BAD_VALUE_HEADER = "Failed to load preview";
-
-    config = new OuterbasePluginConfig_$PLUGIN_ID({});
-
-    constructor() {
-        super()
-
-        // The shadow DOM is a separate DOM tree that is attached to the element.
-        // This allows us to encapsulate our styles and markup. It also prevents
-        // styles from the parent page from leaking into our plugin.
-        this.shadow = this.attachShadow({ mode: 'open' })
-        this.shadow.appendChild(templateEditor_$PLUGIN_ID.content.cloneNode(true))
-
-        // Parse the configuration object from the `configuration` attribute
-        // and store it in the `config` property.
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(
-            JSON.parse(this.getAttribute('configuration'))
-        )
+    var error = this.isInvalidHTML(value);
+    if (error) {
+      this.shadow.querySelector("#container").style.padding = "20px";
+      this.shadow.querySelector("#header").innerHTML =
+        OuterbasePluginEditor_$PLUGIN_ID.BAD_VALUE_HEADER;
+      this.shadow.querySelector("#error").style.display = "block";
+      this.shadow.querySelector("#error").innerHTML = error.innerHTML;
+      this.shadow.querySelector("#content").innerText = value;
+      return;
     }
 
-    // This function is called when the UI is made available into the DOM. Put any
-    // logic that you want to run when the element is first stood up here, such as
-    // event listeners, default values to display, etc.
-    connectedCallback() {
-        const value = this.getAttribute("cellValue");
+    this.shadow.querySelector("#header").style.display = "none";
+    this.shadow.querySelector("#hr").style.display = "none";
+    this.shadow.querySelector("#content").innerHTML = value;
+  }
 
-        this.shadow.querySelector("#container").style.padding = "0px";
-        this.shadow.querySelector("#header").style.display = "block";
-        this.shadow.querySelector("#hr").style.display = "block";
+  isEmpty(data) {
+    return !data || data.length == 0;
+  }
 
-        if (this.isEmpty(value)) {
-            this.shadow.querySelector("#header").innerHTML = OuterbasePluginEditor_$PLUGIN_ID.NO_VALUE_HEADER;
-            return;
-        }
-
-        var error = this.isInvalidHTML(value);
-        if (error) {
-            this.shadow.querySelector("#container").style.padding = "20px";
-            this.shadow.querySelector("#header").innerHTML = OuterbasePluginEditor_$PLUGIN_ID.BAD_VALUE_HEADER;
-            this.shadow.querySelector("#error").style.display = "block";
-            this.shadow.querySelector("#error").innerHTML = error.innerHTML;
-            this.shadow.querySelector("#content").innerText = value;
-            return;
-        }
-
-        this.shadow.querySelector("#header").style.display = "none";
-        this.shadow.querySelector("#hr").style.display = "none";
-        this.shadow.querySelector("#content").innerHTML = value;
-    }
-    
-    isEmpty(data) {
-        return !data || data.length == 0;
-    }
-    
-    isInvalidHTML(data) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(data, "application/xml");
-        return doc.querySelector("parsererror");
-    }
+  isInvalidHTML(data) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(data, "application/xml");
+    return doc.querySelector("parsererror");
+  }
 }
 
 // DO NOT change the name of this variable or the classes defined in this file.
 // Changing the name of this variable will cause your plugin to not work properly
 // when installed in Outerbase.
-window.customElements.define('outerbase-plugin-cell-$PLUGIN_ID', OuterbasePluginCell_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-editor-$PLUGIN_ID', OuterbasePluginEditor_$PLUGIN_ID)
+window.customElements.define(
+  "outerbase-plugin-cell-$PLUGIN_ID",
+  OuterbasePluginCell_$PLUGIN_ID
+);
+window.customElements.define(
+  "outerbase-plugin-editor-$PLUGIN_ID",
+  OuterbasePluginEditor_$PLUGIN_ID
+);
