@@ -118,6 +118,13 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     const cell = this.shadow.getElementById("jsonValue");
     const cellValue = this.decodeAttributeByName(this, "cellvalue");
 
+    // Handle NULL text coloring
+    if (cellValue === "NULL") {
+      cell.style.color = `var(--ob-null-text-color)`;
+    } else {
+      cell.style.color = `var(--ob-text-color)`;
+    }
+
     try {
       const parsedCellValue = JSON.parse(cellValue);
       const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
@@ -206,6 +213,7 @@ const templateEditor_$PLUGIN_ID = document.createElement("template");
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
     #container {
+      width: 260px;
       margin-top: 4px;
     }
 
@@ -330,17 +338,6 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
     } catch {
       jsonEditor.innerHTML = cellValue;
     }
-
-    // this.shadow.getElementById('jsonOutput').innerHTML = this.syntaxHighlight(cellValue);
-
-    // const cellValue = this.decodeAttributeByName(this, "cellvalue");
-    // const jsonEditor = this.shadow.getElementById("jsonEditor");
-    // try {
-    //   const parsedJSON = JSON.parse(cellValue);
-    //   jsonEditor.innerHTML = JSON.stringify(parsedJSON, undefined, 2)
-    // } catch {
-    //   jsonEditor.innerHTML = cellValue;
-    // }
 
     jsonEditor.addEventListener("blur", (ev) => {
       try {
