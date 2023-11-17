@@ -127,7 +127,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
 
     try {
       const parsedCellValue = JSON.parse(cellValue);
-      const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+      const prettyJSON = JSON.stringify(parsedCellValue);
       cell.value = prettyJSON;
     } catch {
       cell.value = cellValue;
@@ -146,7 +146,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     jsonValue.addEventListener("blur", () => {
       try {
         const parsedCellValue = JSON.parse(jsonValue.value);
-        const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+        const prettyJSON = JSON.stringify(parsedCellValue);
         this.callCustomEvent({
           action: "updatecell",
           value: prettyJSON.replace(/\n/g, ""),
@@ -174,7 +174,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
       }
       try {
         const parsedCellValue = JSON.parse(jsonValue.value);
-        const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+        const prettyJSON = JSON.stringify(parsedCellValue);
         this.callCustomEvent({
           action: "updatecell",
           value: prettyJSON.replace(/\n/g, ""),
@@ -341,9 +341,10 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
 
     jsonEditor.addEventListener("blur", (ev) => {
       try {
+        const cleanedValue = JSON.stringify(JSON.parse(jsonEditor.innerText));
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.innerText.replace(/\n/g, ""),
+          value: cleanedValue.replace(/\n/g, ""),
         });
       } catch (e) {
         this.callCustomEvent({
@@ -367,9 +368,11 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       e.preventDefault();
 
       try {
+        const cleanedValue = JSON.stringify(JSON.parse(jsonEditor.innerText));
+
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.innerText.replace(/\n/g, ""),
+          value: cleanedValue.replace(/\n/g, ""),
         });
       } catch (e) {
         this.callCustomEvent({
