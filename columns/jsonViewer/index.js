@@ -118,9 +118,16 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     const cell = this.shadow.getElementById("jsonValue");
     const cellValue = this.decodeAttributeByName(this, "cellvalue");
 
+    // Handle NULL text coloring
+    if (cellValue === "NULL") {
+      cell.style.color = `var(--ob-null-text-color)`;
+    } else {
+      cell.style.color = `var(--ob-text-color)`;
+    }
+
     try {
       const parsedCellValue = JSON.parse(cellValue);
-      const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+      const prettyJSON = JSON.stringify(parsedCellValue);
       cell.value = prettyJSON;
     } catch {
       cell.value = cellValue;
@@ -139,7 +146,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     jsonValue.addEventListener("blur", () => {
       try {
         const parsedCellValue = JSON.parse(jsonValue.value);
-        const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+        const prettyJSON = JSON.stringify(parsedCellValue);
         this.callCustomEvent({
           action: "updatecell",
           value: prettyJSON.replace(/\n/g, ""),
@@ -167,7 +174,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
       }
       try {
         const parsedCellValue = JSON.parse(jsonValue.value);
-        const prettyJSON = JSON.stringify(parsedCellValue, undefined, 2);
+        const prettyJSON = JSON.stringify(parsedCellValue);
         this.callCustomEvent({
           action: "updatecell",
           value: prettyJSON.replace(/\n/g, ""),
@@ -206,6 +213,7 @@ const templateEditor_$PLUGIN_ID = document.createElement("template");
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
     #container {
+      width: 260px;
       margin-top: 4px;
     }
 
@@ -331,22 +339,12 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       jsonEditor.innerHTML = cellValue;
     }
 
-    // this.shadow.getElementById('jsonOutput').innerHTML = this.syntaxHighlight(cellValue);
-
-    // const cellValue = this.decodeAttributeByName(this, "cellvalue");
-    // const jsonEditor = this.shadow.getElementById("jsonEditor");
-    // try {
-    //   const parsedJSON = JSON.parse(cellValue);
-    //   jsonEditor.innerHTML = JSON.stringify(parsedJSON, undefined, 2)
-    // } catch {
-    //   jsonEditor.innerHTML = cellValue;
-    // }
-
     jsonEditor.addEventListener("blur", (ev) => {
       try {
+        const cleanedValue = JSON.stringify(JSON.parse(jsonEditor.innerText));
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.innerText.replace(/\n/g, ""),
+          value: cleanedValue.replace(/\n/g, ""),
         });
       } catch (e) {
         this.callCustomEvent({
@@ -370,9 +368,11 @@ class OuterbasePluginEditor_$PLUGIN_ID extends HTMLElement {
       e.preventDefault();
 
       try {
+        const cleanedValue = JSON.stringify(JSON.parse(jsonEditor.innerText));
+
         this.callCustomEvent({
           action: "updatecell",
-          value: jsonEditor.innerText.replace(/\n/g, ""),
+          value: cleanedValue.replace(/\n/g, ""),
         });
       } catch (e) {
         this.callCustomEvent({
