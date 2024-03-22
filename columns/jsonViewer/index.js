@@ -217,7 +217,7 @@ templateEditor_$PLUGIN_ID.innerHTML = `
       margin-top: 4px;
     }
 
-    #jsonEditor {
+    #jsonOutput {
         width: 314px;
         height: 165px;
         border-radius: 20px;
