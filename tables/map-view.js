@@ -149,10 +149,12 @@ templateTable_$PLUGIN_ID.innerHTML = `
         overflow-y: scroll;
     }
 
+    #map {
+      height: 800px;
+    }
+
     .grid-container {
         flex: 1;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
         padding: 12px;
     }
@@ -162,96 +164,19 @@ templateTable_$PLUGIN_ID.innerHTML = `
         display: flex;
         flex-direction: column;
         background-color: transparent;
+        border: 1px solid rgb(238, 238, 238);
+        border-radius: 4px;
+        box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05);
         overflow: clip;
-    }
-
-    .img-wrapper {
-        height: 0;
-        overflow: hidden;
-        padding-top: 100%;
-        box-sizing: border-box;
-        position: relative;
-    }
-
-    .img-empty {
-        height: 0;
-        overflow: hidden;
-        padding-top: 100%;
-        box-sizing: border-box;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #A3A3A3;
-        background: #171717;
-    }
-
-    .img-empty > div {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        font-family: "Inter", sans-serif;
-        font-size: 11px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 21px; 
-    }
-
-    img {
-        width: 100%;
-        vertical-align: top;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .select-column-link {
-        font-weight: 500;
-        text-decoration-line: underline;
-        cursor: pointer;
-    }
-
-    .contents {
-        padding: 12px 0 0 0;
-    }
-
-    .title {
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 21px;
-        font-family: "Menlo", sans-serif;
-        line-clamp: 2;
-        margin-bottom: 0;
     }
 
     .subtitle {
         font-size: 12px;
-        line-height: 21px;
-        font-family: "Menlo", sans-serif;
-        font-weight: 400;
-    }
-
-    .description {
-        flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 12px;
-        line-height: 21px;
-        font-family: "Menlo", sans-serif;
-
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;  
-        overflow: hidden;
+        line-height: 16px;
+        font-family: "Inter", sans-serif;
+        color: gray;
+        font-weight: 300;
+        margin-top: 8px;
     }
 
     p {
@@ -265,26 +190,6 @@ templateTable_$PLUGIN_ID.innerHTML = `
         }
     }
 
-    @media only screen and (min-width: 768px) {
-        .grid-container {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 32px;
-        }
-    }
-
-    @media only screen and (min-width: 1200px) {
-        .grid-container {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 32px;
-        }
-    }
-
-    @media only screen and (min-width: 1600px) {
-        .grid-container {
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 32px;
-        }
-    }
 </style>
 
 <div id="theme-container">
@@ -294,6 +199,9 @@ templateTable_$PLUGIN_ID.innerHTML = `
 </div>
 `
 // Can the above div just be a self closing container: <div />
+var script_$PLUGIN_ID = document.createElement('script')
+script_$PLUGIN_ID.type = 'text/javascript'
+script_$PLUGIN_ID.src = "https://polyfill.io/v3/polyfill.min.js?features=default";
 
 class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
@@ -307,23 +215,64 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
 
         this.shadow = this.attachShadow({ mode: "open" })
         this.shadow.appendChild(templateTable_$PLUGIN_ID.content.cloneNode(true))
+
+        const apiKey = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration")).apiKey
+
+        if (window.gmap === undefined) {
+            this.shadow.appendChild(script_$PLUGIN_ID)
+            this.loadExternalScript(`//maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=maps,marker&v=beta&callback=initMap`)
+        }
     }
 
     connectedCallback() {
         this.render()
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
-        this.config.tableValue = decodeAttributeByName_$PLUGIN_ID(this, "tableValue")
+    loadExternalScript(url) {
+        var init_script = document.createElement('script')
+        init_script.type = 'text/javascript'
+        init_script.innerHTML = `
+            async function initMap() {
+                // Request needed libraries.
+                console.log("Map init")
+        
+                const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
-        let metadata = decodeAttributeByName_$PLUGIN_ID(this, "metadata")
-        this.config.count = metadata?.count
-        this.config.limit = metadata?.limit
-        this.config.offset = metadata?.offset
-        this.config.theme = metadata?.theme
-        this.config.page = metadata?.page
-        this.config.pageCount = metadata?.pageCount
+                const plugins = document.querySelectorAll("#plugin-component")
+                for (const plugin of plugins) {
+
+                    if (window.gmap === undefined) {
+                        window.gmap = new Map(document.getElementById("plugin-component").shadowRoot.getElementById("map"), {
+                            center: { lat: 37.39094933041195, lng: -122.02503913145092 },
+                            zoom: 3,
+                            mapId: "4504f8b37365c3d0",
+                        });
+                    }
+
+                    window.customElements.whenDefined(plugin.localName).then(() => {
+                        plugin.render()
+                    })
+                }
+            }
+        `
+
+        document.head.appendChild(init_script);
+
+        const script = document.createElement('script');
+        script.type = 'text/javascript'
+        script.src = url;
+        script.defer = true
+        script.async = true
+
+        document.head.appendChild(script);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
+        this.config.tableValue = decodeAttributeByName(this, "tableValue")
+        this.config.theme = decodeAttributeByName(this, "metadata").theme
+        this.config.metadata = decodeAttributeByName(this, "metadata")
 
         var element = this.shadow.getElementById("theme-container");
         element.classList.remove("dark")
@@ -334,73 +283,154 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
 
     render() {
         this.shadow.querySelector("#container").innerHTML = `
-        <div class="grid-container">
-            ${this.config?.tableValue?.length && this.config?.tableValue?.map((row) => `
+            <div class="grid-container">
+                <h1>Welcome to the Outerbase!</h1>
                 <div class="grid-item">
-                    ${ (this.config.imageKey && this.isValidURL(`${this.config.optionalImagePrefix ?? ''}${row[this.config.imageKey]}`)) 
-                        ? `<div class="img-wrapper"><img src="${`${this.config.optionalImagePrefix ?? ''}${row[this.config.imageKey]}`}" width="100" height="100"></div>` 
-                        : `<div class="img-empty">
-                                <div>
-                                    <div style="flex: 1;"></div>
-                                    <div>No image selected</div>
-                                    <div class="select-column-link">Select column</div>
-                                    <div style="flex: 1;"></div>
-                                </div>
-                            </div>` }
-
-                    <div class="contents">
-                        ${ this.config.titleKey ? `<p class="title">${row[this.config.titleKey]}</p>` : `` }
-                        ${ this.config.subtitleKey ? `<p class="subtitle">${row[this.config.subtitleKey]}</p>` : `` }
-                        ${ this.config.descriptionKey ? `<p class="description">${row[this.config.descriptionKey]}</p>` : `` }
+                    <div id="map">
                     </div>
                 </div>
-            `).join("")}
-        </div>
 
-        <div style="text-align: center; padding-top: 40px; padding-bottom: 100px;">
-            Viewing ${this.config.offset} - ${this.config.limit} of ${this.config.count} results
-            <br />
-            Page ${this.config.page} of ${this.config.pageCount}
-            <br />
-            ${this.config.page > 1 ? `<button id="previousPageButton">Previous Page</button>` : ``}
-            ${this.config.page < this.config.pageCount ? `<button id="nextPageButton">Next Page</button>` : ``}
-        </div>
+                <div style="display: flex; flex-direction: row; gap: 12px; padding-top:25px">
+                    <div class="mx-3 text-sm text-neutral-900 dark:text-neutral-50">Viewing ${this.config.metadata.offset}-${this.config.metadata.limit} of ${this.config.metadata.count}</div>
+                    <button id="previousPageButton" ${(this.config.metadata.page <= 1) ? "disabled" : ""}>Previous Page</button>
+                    <button id="nextPageButton" ${(this.config.metadata.page >= this.config.metadata.pageCount) ? "disabled" : ""}>Next Page</button>
+                </div>
+            </div>
         `
 
-        const configurePluginButtons = this.shadow.querySelectorAll('.select-column-link');
-        configurePluginButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => {
-                triggerEvent_$PLUGIN_ID(this, {
-                    action: OuterbaseEvent_$PLUGIN_ID.configurePlugin
-                })
+        if (window.gmap) {
+
+            window.gmap = new google.maps.Map(document.getElementById("plugin-component").shadowRoot.getElementById("map"), {
+                center: { lat: 37.39094933041195, lng: -122.02503913145092 },
+                zoom: 3,
+                mapId: "4504f8b37365c3d0",
             });
-        });
+
+            this.config.tableValue?.map((row) => {
+
+                const clickableMarker = new google.maps.marker.AdvancedMarkerElement({
+                    map: window.gmap,
+                    position: { lat: row[this.config.latitudeKey], lng: row[this.config.longitudeKey] },
+                    gmpDraggable: false,
+                    title: row[this.config.titleKey],
+                });
+
+                const content = document.createElement('div');
+                content.classList.add("property")
+                content.innerHTML = `
+                    <style>
+                        #info-container {
+                            display: flex;
+                            flex-direction: column;
+                            height: 100%;
+                            overflow-y: hidden;
+                            width: 450px;
+                        }
+
+                        .info-grid-item {
+                            position: relative;
+                            display: flex;
+                            flex-direction: column;
+                            background-color: transparent;
+                            border: 1px solid rgb(238, 238, 238);
+                            border-radius: 4px;
+                            box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.05);
+                            overflow: clip;
+                        }
+
+                        img {
+                            vertical-align: top;
+                            height: 300px;
+                            object-fit: cover;
+                        }
+
+                        .info-contents {
+                            padding: 12px;
+                        }
+
+                        .title {
+                            font-weight: bold;
+                            font-size: 16px;
+                            line-height: 24px;
+                            font-family: "Inter", sans-serif;
+                            line-clamp: 2;
+                            margin-bottom: 8px;
+                        }
+
+                        .description {
+                            flex: 1;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            font-size: 14px;
+                            line-height: 20px;
+                            font-family: "Inter", sans-serif;
+
+                            display: -webkit-box;
+                            -webkit-line-clamp: 3;
+                            -webkit-box-orient: vertical;  
+                            overflow: hidden;
+                        }
+
+                        .subtitle {
+                            font-size: 12px;
+                            line-height: 16px;
+                            font-family: "Inter", sans-serif;
+                            color: gray;
+                            font-weight: 300;
+                            margin-top: 8px;
+                        }
+
+                        p {
+                            margin: 0;
+                        }
+                    </style>
+                    
+                    <div id="info-container">
+                        <div class="info-grid-item">
+                            ${ this.config.imageKey ? `<img src="${row[this.config.imageKey]}">` : `` }
+
+                            <div class="info-contents">
+                                ${ this.config.titleKey ? `<p class="title">${row[this.config.titleKey]}</p>` : `` }
+                                ${ this.config.subtitleKey ? `<p class="subtitle">${row[this.config.subtitleKey]}</p>` : `` }
+                                ${ this.config.descriptionKey ? `<p class="description">${row[this.config.descriptionKey]}</p>` : `` }
+                            </div>
+                        </div>
+                    </div>
+                `
+                
+                const infoWindow = new google.maps.InfoWindow({
+                    content: content
+                });
+                
+
+                clickableMarker.addListener("gmp-click", (event) => {
+                    
+                    if (this.openedInfoWindow !== undefined) {
+                        this.openedInfoWindow.close()
+                    }
+
+                    const position = clickableMarker.position;
+                    infoWindow.open(clickableMarker.map, clickableMarker);
+                    this.openedInfoWindow = infoWindow;
+                });
+            })
+        }
 
         var previousPageButton = this.shadow.getElementById("previousPageButton");
-        previousPageButton?.addEventListener("click", () => {
-            triggerEvent_$PLUGIN_ID(this, {
-                action: OuterbaseTableEvent_$PLUGIN_ID.getPreviousPage,
+        previousPageButton.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseTableEvent.getPreviousPage,
                 value: {}
             })
         });
 
         var nextPageButton = this.shadow.getElementById("nextPageButton");
-        nextPageButton?.addEventListener("click", () => {
-            triggerEvent_$PLUGIN_ID(this, {
-                action: OuterbaseTableEvent_$PLUGIN_ID.getNextPage,
+        nextPageButton.addEventListener("click", () => {
+            triggerEvent(this, {
+                action: OuterbaseTableEvent.getNextPage,
                 value: {}
             })
         });
-    }
-
-    isValidURL(string) {
-        try {
-            new URL(string);
-        } catch (_) {
-            return false;  
-        }
-
-        return true;
     }
 }
 
@@ -645,27 +675,37 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
 
         this.shadow.querySelector('#configuration-container').innerHTML = `
         <div style="flex: 1;">
+            <p class="field-title">Google Maps API Key</p>
+            <input id="apiKeyInput" type="text" value="${this.config.apiKey}" />
+
+            <p class="field-title">Longitude Key</p>
+            <select id="longitudeKeySelect">
+                ` + keys.map((key) => `<option value="${key}" ${key === this.config.longitudeKey ? 'selected' : ''}>${key}</option>`).join("") + `
+            </select>
+
+            <p class="field-title">Latitude Key</p>
+            <select id="latitudeKeySelect">
+                ` + keys.map((key) => `<option value="${key}" ${key === this.config.latitudeKey ? 'selected' : ''}>${key}</option>`).join("") + `
+            </select>
+
             <p class="field-title">Image Key</p>
             <select id="imageKeySelect">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.imageKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
-
-            <p class="field-title">Image URL Prefix (optional)</p>
-            <input type="text" value="${this.config.optionalImagePrefix ? this.config.optionalImagePrefix : ''}" />
 
             <p class="field-title">Title Key</p>
             <select id="titleKeySelect">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.titleKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
-            <p class="field-title">Description Key</p>
-            <select id="descriptionKeySelect">
-                ` + keys.map((key) => `<option value="${key}" ${key === this.config.descriptionKey ? 'selected' : ''}>${key}</option>`).join("") + `
-            </select>
-
             <p class="field-title">Subtitle Key</p>
             <select id="subtitleKeySelect">
                 ` + keys.map((key) => `<option value="${key}" ${key === this.config.subtitleKey ? 'selected' : ''}>${key}</option>`).join("") + `
+            </select>
+
+            <p class="field-title">Description Key</p>
+            <select id="descriptionKeySelect">
+                ` + keys.map((key) => `<option value="${key}" ${key === this.config.descriptionKey ? 'selected' : ''}>${key}</option>`).join("") + `
             </select>
 
             <div style="margin-top: 8px;">
@@ -675,21 +715,12 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
 
         <div style="position: relative;">
             <div class="preview-card">
-                ${ (this.config.imageKey && this.isValidURL(`${this.shadow.querySelector("input")?.value}${sample[this.config.imageKey]}`)) 
-                    ? `<div class="img-wrapper"><img src="${`${this.shadow.querySelector("input")?.value}${sample[this.config.imageKey]}`}" width="100%" height="100%"></div>` 
-                    : `<div class="img-empty">
-                            <div>
-                                <div style="flex: 1;"></div>
-                                <div>No image selected</div>
-                                <div class="select-column-link">Select column</div>
-                                <div style="flex: 1;"></div>
-                            </div>
-                        </div>` }
+                <img src="${sample[this.config.imageKey]}" width="100" height="100">
 
-                <div style="padding: 16px;">
-                    <p class="title">${sample[this.config.titleKey]}</p>
-                    <p class="subtitle">${sample[this.config.subtitleKey]}</p>
-                    <p class="description">${sample[this.config.descriptionKey]}</p>
+                <div>
+                    <p style="margin-bottom: 8px; font-weight: bold; font-size: 16px; line-height: 24px; font-family: 'Inter', sans-serif;">${sample[this.config.titleKey]}</p>
+                    <p style="margin-bottom: 8px; font-size: 14px; line-height: 21px; font-weight: 400; font-family: 'Inter', sans-serif;">${sample[this.config.descriptionKey]}</p>
+                    <p style="margin-top: 12px; font-size: 12px; line-height: 16px; font-family: 'Inter', sans-serif; color: gray; font-weight: 300;">${sample[this.config.subtitleKey]}</p>
                 </div>
             </div>
         </div>
@@ -697,21 +728,21 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            triggerEvent_$PLUGIN_ID(this, {
-                action: OuterbaseEvent_$PLUGIN_ID.onSave,
+            triggerEvent(this, {
+                action: OuterbaseEvent.onSave,
                 value: this.config.toJSON()
             })
+        });
+
+        var apiKeyInput = this.shadow.getElementById("apiKeyInput");
+        apiKeyInput.addEventListener("change", () => {
+            this.config.apiKey = apiKeyInput.value
+            this.render()
         });
 
         var imageKeySelect = this.shadow.getElementById("imageKeySelect");
         imageKeySelect.addEventListener("change", () => {
             this.config.imageKey = imageKeySelect.value
-            this.render()
-        });
-        
-        var optionalImagePrefixInput = this.shadow.querySelector("input");
-        optionalImagePrefixInput.addEventListener("change", () => {
-            this.config.optionalImagePrefix = optionalImagePrefixInput.value
             this.render()
         });
 
@@ -732,20 +763,20 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
             this.config.subtitleKey = subtitleKeySelect.value
             this.render()
         });
-    }
 
-    isValidURL(string) {
-        try {
-            new URL(string);
-        } catch (_) {
-            return false;  
-        }
+        var latitudeKeySelect = this.shadow.getElementById("latitudeKeySelect");
+        latitudeKeySelect.addEventListener("change", () => {
+            this.config.latitudeKey = latitudeKeySelect.value
+            this.render()
+        });
 
-        return true;
+        var longitudeKeySelect = this.shadow.getElementById("longitudeKeySelect");
+        longitudeKeySelect.addEventListener("change", () => {
+            this.config.longitudeKey = longitudeKeySelect.value
+            this.render()
+        });
     }
 }
 
 window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
 window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)
-// window.customElements.define('outerbase-plugin-table-gallery', OuterbasePluginTable_$PLUGIN_ID)
-// window.customElements.define('outerbase-plugin-configuration-gallery', OuterbasePluginConfiguration_$PLUGIN_ID)

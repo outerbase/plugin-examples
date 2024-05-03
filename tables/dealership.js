@@ -1,4 +1,4 @@
-var observableAttributes = [
+var observableAttributes_$PLUGIN_ID = [
     // The value of the cell that the plugin is being rendered in
     "cellvalue",
     // The value of the row that the plugin is being rendered in
@@ -15,14 +15,14 @@ var observableAttributes = [
     "metadata"
 ]
 
-var OuterbaseEvent = {
+var OuterbaseEvent_$PLUGIN_ID = {
     // The user has triggered an action to save updates
     onSave: "onSave",
     // The user has triggered an action to configure the plugin
     configurePlugin: "configurePlugin",
 }
 
-var OuterbaseColumnEvent = {
+var OuterbaseColumnEvent_$PLUGIN_ID = {
     // The user has began editing the selected cell
     onEdit: "onEdit",
     // Stops editing a cells editor popup view and accept the changes
@@ -33,7 +33,7 @@ var OuterbaseColumnEvent = {
     updateCell: "updateCell",
 }
 
-var OuterbaseTableEvent = {
+var OuterbaseTableEvent_$PLUGIN_ID = {
     // Updates the value of a row with the provided JSON value
     updateRow: "updateRow",
     // Deletes an entire row with the provided JSON value
@@ -59,12 +59,12 @@ var OuterbaseTableEvent = {
  *  ░░░▀░░░░░░░░▀░░░░
  *  ░░░░░░░░░░░░░░░░░
  * 
- * Define your custom classes here. We do recommend the usage of our `OuterbasePluginConfig_$PLUGIN_ID`
+ * Define your custom classes here. We do recommend the usage of our `OuterbasePluginModel_$PLUGIN_ID`
  * class for you to manage properties between the other classes below, however, it's strictly optional.
  * However, this would be a good class to contain the properties you need to store when a user installs
  * or configures your plugin.
  */
-class OuterbasePluginConfig_$PLUGIN_ID {
+class OuterbasePluginModel_$PLUGIN_ID {
     // Inputs from Outerbase for us to retain
     tableValue = undefined
     count = 0
@@ -103,7 +103,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     }
 }
 
-var triggerEvent = (fromClass, data) => {
+var triggerEvent_$PLUGIN_ID = (fromClass, data) => {
     const event = new CustomEvent("custom-change", {
         detail: data,
         bubbles: true,
@@ -113,7 +113,7 @@ var triggerEvent = (fromClass, data) => {
     fromClass.dispatchEvent(event);
 }
 
-var decodeAttributeByName = (fromClass, name) => {
+var decodeAttributeByName_$PLUGIN_ID = (fromClass, name) => {
     const encodedJSON = fromClass.getAttribute(name);
     const decodedJSON = encodedJSON
         ?.replace(/&quot;/g, '"')
@@ -135,8 +135,8 @@ var decodeAttributeByName = (fromClass, name) => {
  *  ░░░░░░░░░░░░░░░░░░
  *  ░░░░░░░░░░░░░░░░░░
  */
-var templateTable = document.createElement("template")
-templateTable.innerHTML = `
+var templateTable_$PLUGIN_ID = document.createElement("template")
+var templateTableInnerHTML_$PLUGIN_ID = `
 <style>
     #theme-container {
         height: 100%;
@@ -262,12 +262,12 @@ templateTable.innerHTML = `
 `
 // Can the above div just be a self closing container: <div />
 
-class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginTableView_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return observableAttributes
+        return observableAttributes_$PLUGIN_ID
     }
 
-    config = new OuterbasePluginConfig_$PLUGIN_ID({})
+    config = new OuterbasePluginModel_$PLUGIN_ID({})
 
     constructor() {
         super()
@@ -281,10 +281,10 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
-        this.config.tableValue = decodeAttributeByName(this, "tableValue")
+        this.config = new OuterbasePluginModel_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
+        this.config.tableValue = decodeAttributeByName_$PLUGIN_ID(this, "tableValue")
 
-        let metadata = decodeAttributeByName(this, "metadata")
+        let metadata = decodeAttributeByName_$PLUGIN_ID(this, "metadata")
         this.config.count = metadata?.count
         this.config.limit = metadata?.limit
         this.config.offset = metadata?.offset
@@ -299,9 +299,17 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
         this.render()
     }
 
+    setupCheck() {
+        let template = templateTable_$PLUGIN_ID
+        template.innerHTML = templateTableInnerHTML_$PLUGIN_ID
+        this.shadow.appendChild(template.content.cloneNode(true))
+    }
+
     render() {
+        this.setupCheck()
+
         this.shadow.querySelector("#container").innerHTML = `
-        <div class="grid-container">
+        <div class="grid-container" style="color: ${this.config.theme.color}">
             <h1>Welcome to the Outerbase Car Dealership!<br /><br /><br /><br />View All ></h1>
             ${this.config?.tableValue?.length && this.config?.tableValue?.map((row) => `
                 <div class="grid-item">
@@ -339,8 +347,8 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
         
         var configurePluginButton = this.shadow.getElementById("configurePluginButton");
         configurePluginButton.addEventListener("click", () => {
-            triggerEvent(this, {
-                action: OuterbaseEvent.configurePlugin
+            triggerEvent_$PLUGIN_ID(this, {
+                action: OuterbaseEvent_$PLUGIN_ID.configurePlugin
             })
         });
 
@@ -348,8 +356,8 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
         deleteRowButtons.forEach((btn, index) => {
             btn.addEventListener('click', () => {
                 let row = this.config.tableValue[index]
-                triggerEvent(this, {
-                    action: OuterbaseTableEvent.deleteRow,
+                triggerEvent_$PLUGIN_ID(this, {
+                    action: OuterbaseTableEvent_$PLUGIN_ID.deleteRow,
                     value: row
                 })
 
@@ -403,24 +411,24 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
             this.config.tableValue.push(row)
             this.render()
             
-            triggerEvent(this, {
-                action: OuterbaseTableEvent.createRow,
+            triggerEvent_$PLUGIN_ID(this, {
+                action: OuterbaseTableEvent_$PLUGIN_ID.createRow,
                 value: row
             })
         });
 
         var previousPageButton = this.shadow.getElementById("previousPageButton");
         previousPageButton.addEventListener("click", () => {
-            triggerEvent(this, {
-                action: OuterbaseTableEvent.getPreviousPage,
+            triggerEvent_$PLUGIN_ID(this, {
+                action: OuterbaseTableEvent_$PLUGIN_ID.getPreviousPage,
                 value: {}
             })
         });
 
         var nextPageButton = this.shadow.getElementById("nextPageButton");
         nextPageButton.addEventListener("click", () => {
-            triggerEvent(this, {
-                action: OuterbaseTableEvent.getNextPage,
+            triggerEvent_$PLUGIN_ID(this, {
+                action: OuterbaseTableEvent_$PLUGIN_ID.getNextPage,
                 value: {}
             })
         });
@@ -451,8 +459,8 @@ class OuterbasePluginTable_$PLUGIN_ID extends HTMLElement {
  * event exists so Outerbase can complete the installation or preference update
  * action.
  */
-var templateConfiguration = document.createElement("template")
-templateConfiguration.innerHTML = `
+var templateConfiguration_$PLUGIN_ID = document.createElement("template")
+templateConfiguration_$PLUGIN_ID.innerHTML = `
 <style>
     #configuration-container {
         display: flex;
@@ -561,12 +569,12 @@ templateConfiguration.innerHTML = `
 `
 // Can the above div just be a self closing container: <div />
 
-class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
+class OuterbasePluginConfigurationView_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return observableAttributes
+        return observableAttributes_$PLUGIN_ID
     }
 
-    config = new OuterbasePluginConfig_$PLUGIN_ID({})
+    config = new OuterbasePluginModel_$PLUGIN_ID({})
 
     constructor() {
         super()
@@ -580,13 +588,13 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
-        this.config.tableValue = decodeAttributeByName(this, "tableValue")
-        this.config.theme = decodeAttributeByName(this, "metadata").theme
+        this.config = new OuterbasePluginModel_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
+        this.config.tableValue = decodeAttributeByName_$PLUGIN_ID(this, "tableValue")
+        this.config.theme = decodeAttributeByName_$PLUGIN_ID(this, "metadata").theme
 
-        var element = this.shadow.getElementById("theme-container");
-        element.classList.remove("dark")
-        element.classList.add(this.config.theme);
+        // var element = this.shadow.getElementById("theme-container");
+        // element.classList.remove("dark")
+        // element.classList.add(this.config.theme);
 
         this.render()
     }
@@ -642,8 +650,8 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            triggerEvent(this, {
-                action: OuterbaseEvent.onSave,
+            triggerEvent_$PLUGIN_ID(this, {
+                action: OuterbaseEvent_$PLUGIN_ID.onSave,
                 value: this.config.toJSON()
             })
         });
@@ -674,5 +682,5 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 }
 
-window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTable_$PLUGIN_ID)
-window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfiguration_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-table-$PLUGIN_ID', OuterbasePluginTableView_$PLUGIN_ID)
+window.customElements.define('outerbase-plugin-configuration-$PLUGIN_ID', OuterbasePluginConfigurationView_$PLUGIN_ID)
