@@ -7,8 +7,8 @@ templateCell_$PLUGIN_ID.innerHTML = `
   gap: 8px;
   justify-content: space-between;
   height: 100%;
-  width: calc(100% - 36px);
-  padding: 0 18px;
+  max-width: 100%;
+  padding: 0px 12px;
 }
 
 input {
@@ -130,7 +130,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
       const prettyJSON = JSON.stringify(parsedCellValue);
       cell.value = prettyJSON;
     } catch {
-      cell.value = cellValue;
+      cell.value = cellValue !== "undefined" ? cellValue : "";
     }
 
     var jsonValue = this.shadow.getElementById("jsonValue");

@@ -44,8 +44,8 @@ templateCell_$PLUGIN_ID.innerHTML = `
     gap: 8px;
     justify-content: space-between;
     height: 100%;
-    width: calc(100% - 36px);
-    padding: 0 18px;
+    max-width: 100%;
+    padding: 0px 12px;
 }
 input {
     height: 100%;
@@ -110,39 +110,39 @@ var templateEditor_$PLUGIN_ID = document.createElement("template");
 templateEditor_$PLUGIN_ID.innerHTML = `
 <style>
 #calendar-container {
-margin-top: 4px;
-display: flex;
-font-family: var(--ob-cell-font-family);
-width: 314px;
-color: var(--ob-text-color);
-border-radius: 20px;
-border: 1px solid var(--ob-border-color);
-background-color: var(--ob-background-color);
-box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-flex-direction: column;
-align-items: center;
+  margin-top: 4px;
+  display: flex;
+  font-family: var(--ob-cell-font-family);
+  width: 314px;
+  color: var(--ob-text-color);
+  border-radius: 20px;
+  border: 1px solid var(--ob-border-color);
+  background-color: var(--ob-background-color);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, -0.75);
+  flex-direction: column;
+  align-items: center;
 }
 #mid-calendar {
-display: flex;
-justify-content: space-between;
-align-items: center;
-height: 42px;
-padding: 16px 24px 0px 24px;
-font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 42px;
+  padding: 16px 24px 0px 24px;
+  font-weight: 600;
 }
 #mid-calendar > div {
-display: flex;
+  display: flex;
 }
 #bottom-calendar {
-display: flex;
-align-items: center;
-flex-direction: column;
-width: 280px;
-padding: 12px 0px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 280px;
+  padding: 12px 0px;
 }
 
 svg {
-fill: var(--ob-text-color);
+  fill: var(--ob-text-color);
 }
 
 ul, ol {
@@ -160,22 +160,22 @@ line-height: normal;
 }
 
 li {
-display: flex;
-align-items: center;
-justify-content: center;
-list-style: none;
-width: 40px;
-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style: none;
+  width: 40px;
+  height: 40px;
 }
 #days {
-margin: 0px;
-
+  margin: 0px;
 }
+
 #days > li:hover {
-border-radius: 14px;
-background-color: var(--ob-background-color);
-color: var(--ob-text-color);
-filter: invert(100%);
+  border-radius: 14px;
+  background-color: var(--ob-background-color);
+  color: var(--ob-text-color);
+  filter: invert(100%);
 }
 #close-editor {
 width: 24px;
@@ -190,7 +190,7 @@ border-radius: 14px;
 color: var(--ob-text-color);
 border-radius: 14px;
 background: var(--ob-background-color, #FAFAFA);
-box-shadow: 0px 6px 16px 0px rgba(255, 255, 255, 0.25);
+box-shadow: 0px 6px 16px 0px rgba(255, 255, 255, -0.75);
 filter: invert(100%);
 }
 .day-names {
@@ -315,7 +315,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
       "action-button"
     ) as HTMLElement;
     const cell = this.shadow.getElementById("dateDisplay") as HTMLInputElement;
-    cell.value = cellValue;
+    cell.value = cellValue !== "undefined" ? cellValue : "";
     calendarButton.onclick = () => {
       const ev = createOuterbaseEvent_$PLUGIN_ID({
         action: "onedit",
