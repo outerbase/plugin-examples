@@ -1,0 +1,75 @@
+<html>
+<head>
+    <title>Plugin Playground</title>
+
+    <!-- Import the Inter font from Google -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+    <!-- <script type="module" src="./columns/hackathon/image.js"></script> -->
+    <script type="module" src="./columns/hackathon/foreign-key.js"></script>
+    <!-- <script type="module" src="./columns/hackathon/enum.js"></script> -->
+    <!-- <script type="module" src="./columns/hackathon/privacy.js"></script> -->
+    <!-- <script type="module" src="./columns/hackathon/boolean.js"></script> -->
+    <!-- <script type="module" src="./columns/hackathon/expandable-text.js"></script> -->
+
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+        }
+
+        #container {
+            padding: 8px 12px;
+            height: 44px;
+            width: 50%;
+            background-color: white;
+        }
+
+        #configuration {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+
+    </div>
+
+    <div id="editor">
+
+    </div>
+
+    <div id="configuration">
+
+    </div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Create an instance of universe-editor
+        const plugin = document.createElement('outerbase-plugin-cell');
+        const editor = document.createElement('outerbase-plugin-editor');
+        const configuration = document.createElement('outerbase-plugin-configuration');
+
+        // Image
+        // plugin.setAttribute('cellvalue', 'https://images.freeimages.com/images/large-previews/972/animal-textures-1180974.jpg?fmt=webp&h=350');
+        // editor.setAttribute('cellvalue', 'editor');
+
+        // Foreign Key
+        plugin.setAttribute('cellvalue', 'https://images.freeimages.com/images/large-previews/972/animal-textures-1180974.jpg?fmt=webp&h=350');
+        editor.setAttribute('cellvalue', 'editor');
+
+        // Add plugin to the container
+        document.getElementById('container').appendChild(plugin);
+        document.getElementById('editor').appendChild(editor);
+        document.getElementById('configuration').appendChild(configuration);
+
+        // Listen to event `change` to get the code from the editor
+        plugin.addEventListener('change', (event) => {
+            console.log(event.detail.code);
+        });
+    });
+</script>
+
+</html>
