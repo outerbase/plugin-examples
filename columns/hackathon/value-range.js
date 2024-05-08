@@ -186,6 +186,15 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     }
 }
 
+// SQL to get range of integer values:
+// ----
+// SELECT MIN(column_name) AS MinValue, MAX(column_name) AS MaxValue
+// FROM table_name;
+// ----
+// Put the above in a configuration view so we can quickly sample the data
+// and provide a range of values to the user for their behalf.
+// May also allow them to put a MIN and MAX in as well, or define
+// values to indicator colors themselves.
 
 // DO NOT change the name of this variable or the classes defined in this file.
 // Changing the name of this variable will cause your plugin to not work properly

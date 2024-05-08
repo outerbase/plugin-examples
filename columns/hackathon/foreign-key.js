@@ -296,9 +296,8 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
                 })
             }).then(response => response.json()).then(data => {
                 const item = data.response?.items?.[0] ?? {}
-                // const displayValue = `${item.first_name} ${item.last_name}`
                 const bestCandidate = this.detectGoodColumnCandidate(item)
-                this.shadow.querySelector('#label').innerText = bestCandidate //`${item.first_name} ${item.last_name}`
+                this.shadow.querySelector('#label').innerText = bestCandidate
 
                 // Set cache
                 this.storeValueInCache(cacheKey, bestCandidate)

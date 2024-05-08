@@ -1,9 +1,4 @@
-var privileges_$PLUGIN_ID = [
-    'cellValue',
-    'configuration',
-]
-
-var observableAttributes = [
+var observableAttributes_$PLUGIN_ID = [
     // The value of the cell that the plugin is being rendered in
     "cellValue",
     // The configuration object that the user specified when installing the plugin
@@ -11,22 +6,6 @@ var observableAttributes = [
     // Additional information about the view such as count, page and offset.
     "metadata"
 ]
-
-var OuterbaseEvent = {
-    // The user has triggered an action to save updates
-    onSave: "onSave",
-}
-
-var OuterbaseColumnEvent = {
-    // The user has began editing the selected cell
-    onEdit: "onEdit",
-    // Stops editing a cells editor popup view and accept the changes
-    onStopEdit: "onStopEdit",
-    // Stops editing a cells editor popup view and prevent persisting the changes
-    onCancelEdit: "onCancelEdit",
-    // Updates the cells value with the provided value
-    updateCell: "updateCell",
-}
 
 /**
  * ******************
@@ -54,7 +33,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     }
 }
 
-var triggerEvent = (fromClass, data) => {
+var triggerEvent_$PLUGIN_ID = (fromClass, data) => {
     const event = new CustomEvent("custom-change", {
         detail: data,
         bubbles: true,
@@ -97,13 +76,12 @@ templateCell_$PLUGIN_ID.innerHTML = `
         position: relative;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 8px;
     }
 
     span {
         color: #333;
         cursor: pointer;
+        display: flex;
         font-family: 'Inter', sans-serif;
         font-size: 12px;
         color: var(--ob-text-color);
@@ -111,20 +89,66 @@ templateCell_$PLUGIN_ID.innerHTML = `
         text-overflow: ellipsis;
         white-space: nowrap;
         max-width: 100%;
-        flex: 1;
-        text-decoration: underline;
-        text-underline-offset: 2px;
+        user-select: none;
+    }
+
+    svg {
+        flex-shrink: 0;
+        flex-grow: 0;
+        flex-basis: 16px;
+        fill: var(--ob-text-color);
+        cursor: pointer;
+        padding: 2px;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+    }
+
+    svg:hover {
+        opacity: 1;
+    }
+
+    #date {
+        padding: 2px 4px;
+    }
+
+    #date:hover {
+        color: black;
+        background-color: #e0e0e0;
+        border-radius: 2px;
+    }
+
+    .dark #date:hover {
+        color: white;
+        background-color: #444;
+    }
+
+    #time {
+        padding: 2px 4px;
+    }
+
+    #time:hover {
+        color: black;
+        background-color: #e0e0e0;
+        border-radius: 2px;
+    }
+
+    .dark #time:hover {
+        color: white;
+        background-color: #444;
     }
 </style>
 
 <div id="container" class="theme-container">
-    <span></span>
+    <span id="date">Jan 3 2024</span><span id="time">10:03 PM</span>
+    <!--
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#000000" viewBox="0 0 256 256"><path d="M117.66,170.34a8,8,0,0,1,0,11.32l-32,32a8,8,0,0,1-11.32,0l-32-32a8,8,0,0,1,11.32-11.32L72,188.69V48a8,8,0,0,1,16,0V188.69l18.34-18.35A8,8,0,0,1,117.66,170.34Zm96-96-32-32a8,8,0,0,0-11.32,0l-32,32a8,8,0,0,0,11.32,11.32L168,67.31V208a8,8,0,0,0,16,0V67.31l18.34,18.35a8,8,0,0,0,11.32-11.32Z"></path></svg>
+    -->
 </div>
 `
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges_$PLUGIN_ID
+        return observableAttributes_$PLUGIN_ID
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
@@ -139,11 +163,6 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     connectedCallback() {
         this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
         this.render()
-
-        // When a user clicks the span open a new tab with the link
-        this.shadow.querySelector('span').addEventListener('click', () => {
-            window.open(this.getAttribute('cellvalue'), '_blank')
-        })
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -158,19 +177,45 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     }
 
     render() {
-        let cellValue = this.getAttribute('cellvalue')
+        // Get the cellValue
+        const cellValue = this.getAttribute("cellValue")
 
-        if (cellValue.length === 0) {
-            cellValue = "NULL"
-        }
+        // Cast the cellValue into a date
+        const date = new Date(cellValue)
 
-        this.shadow.querySelector('span').innerText = cellValue
+        // The `date` is in UTC, so we need to convert it to the local timezone
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+        
+
+        // Format a date string with `MMM d yyyy`
+        let dateString = date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        })
+
+        // Remove comma from dateString
+        dateString = dateString.replace(",", "")
+
+        // Format another date string with `h:mm a`
+        const timeString = date.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true
+        })
+
+        // Set `#date` to dateString
+        this.shadow.querySelector("#date").textContent = dateString + ','
+
+        // Set `#time` to timeString
+        this.shadow.querySelector("#time").textContent = timeString
     }
 }
 
-// For Configuration view, let them optionally provide a PREFIX URL
-// to attach to all URL's in the column. If none is provided, just
-// try using the value of the cell.
+
+// For Configuration view let them choose the SOURCE date (e.g. UTC) and the
+// TARGET date (e.g. Local Timezone) and the format of the date and time.
+
 
 // DO NOT change the name of this variable or the classes defined in this file.
 // Changing the name of this variable will cause your plugin to not work properly

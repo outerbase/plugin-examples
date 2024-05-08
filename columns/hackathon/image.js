@@ -280,6 +280,10 @@ templateConfiguration.innerHTML = `
 </div>
 `
 
+// For Configuration view, let them optionally provide a PREFIX URL
+// to attach to all URL's in the column. If none is provided, just
+// try using the value of the cell.
+
 class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
         return privileges

@@ -1,4 +1,4 @@
-var observableAttributes = [
+var observableAttributes_$PLUGIN_ID = [
     // The value of the cell that the plugin is being rendered in
     "cellValue",
     // The configuration object that the user specified when installing the plugin
@@ -7,12 +7,12 @@ var observableAttributes = [
     "metadata"
 ]
 
-var OuterbaseEvent = {
+var OuterbaseEvent_$PLUGIN_ID = {
     // The user has triggered an action to save updates
     onSave: "onSave",
 }
 
-var OuterbaseColumnEvent = {
+var OuterbaseColumnEvent_$PLUGIN_ID = {
     // The user has began editing the selected cell
     onEdit: "onEdit",
     // Stops editing a cells editor popup view and accept the changes
@@ -49,7 +49,7 @@ class OuterbasePluginConfig_$PLUGIN_ID {
     }
 }
 
-var triggerEvent = (fromClass, data) => {
+var triggerEvent_$PLUGIN_ID = (fromClass, data) => {
     const event = new CustomEvent("custom-change", {
         detail: data,
         bubbles: true,
@@ -59,7 +59,7 @@ var triggerEvent = (fromClass, data) => {
     fromClass.dispatchEvent(event);
 }
 
-var decodeAttributeByName = (fromClass, name) => {
+var decodeAttributeByName_$PLUGIN_ID = (fromClass, name) => {
     const encodedJSON = fromClass.getAttribute(name);
     const decodedJSON = encodedJSON
         ?.replace(/&quot;/g, '"')
@@ -116,7 +116,7 @@ templateCell_$PLUGIN_ID.innerHTML = `
 
 class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return observableAttributes_$PLUGIN_ID
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
@@ -129,7 +129,7 @@ class OuterbasePluginCell_$PLUGIN_ID extends HTMLElement {
     }
     
     connectedCallback() {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
         this.render()
     }
 
@@ -170,7 +170,7 @@ templateEditor_$PLUGIN_ID.innerHTML = `
 
 class OuterbasePluginCellEditor_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return observableAttributes_$PLUGIN_ID
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
@@ -183,8 +183,8 @@ class OuterbasePluginCellEditor_$PLUGIN_ID extends HTMLElement {
     }
 
     connectedCallback() {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
-        this.config.cellValue = decodeAttributeByName(this, "cellValue")
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
+        this.config.cellValue = decodeAttributeByName_$PLUGIN_ID(this, "cellValue")
         this.render()
     }
 
@@ -234,7 +234,7 @@ templateConfiguration.innerHTML = `
 
 class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     static get observedAttributes() {
-        return privileges
+        return observableAttributes_$PLUGIN_ID
     }
 
     config = new OuterbasePluginConfig_$PLUGIN_ID({})
@@ -247,8 +247,8 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
     }
 
     connectedCallback() {
-        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName(this, "configuration"))
-        this.config.cellValue = decodeAttributeByName(this, "cellValue")
+        this.config = new OuterbasePluginConfig_$PLUGIN_ID(decodeAttributeByName_$PLUGIN_ID(this, "configuration"))
+        this.config.cellValue = decodeAttributeByName_$PLUGIN_ID(this, "cellValue")
         this.render()
     }
 
@@ -262,7 +262,7 @@ class OuterbasePluginConfiguration_$PLUGIN_ID extends HTMLElement {
 
         var saveButton = this.shadow.getElementById("saveButton");
         saveButton.addEventListener("click", () => {
-            triggerEvent(this, {
+            triggerEvent_$PLUGIN_ID(this, {
                 action: OuterbaseEvent.onSave,
                 value: {}
             })
